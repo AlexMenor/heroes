@@ -1,5 +1,7 @@
 import 'package:app/map.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -29,6 +31,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  Position _currentPosition;
+
+  _MyHomePageState() {
+    final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
+    geolocator
+      .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+      .then((Position position) {
+        print('${position.latitude} ${position.longitude}');
+        setState(() {
+          _currentPosition = position;
+        });
+      }).catchError((e) {
+        print(e);
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
