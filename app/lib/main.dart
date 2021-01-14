@@ -1,6 +1,7 @@
 import 'package:app/map.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlng/latlng.dart';
 
 
 void main() {
@@ -54,8 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: MyMap()
+      body: _currentPosition == null ? Text('Loading') : Center(
+        child: MyMap(location:LatLng(_currentPosition.latitude, _currentPosition.longitude))
       ),
     );
   }

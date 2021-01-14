@@ -5,14 +5,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 
 class MyMap extends StatefulWidget {
+  final LatLng location;
+  MyMap({Key key, this.location}) : super(key: key);
   @override
-  _MyMapState createState() => _MyMapState();
+  _MyMapState createState() => _MyMapState(this.location);
 }
 
 class _MyMapState extends State<MyMap> {
-  final controller = MapController(
-    location: LatLng(42.5490098, -3.3255327),
-  );
+  _MyMapState(LatLng location){
+    this.controller = MapController(location: location);
+  }
+  MapController controller;
 
   void _onDoubleTap() {
     controller.zoom += 0.5;
