@@ -1,0 +1,27 @@
+\chapter{Descripción del servicio geo}
+
+\section{Localización}
+Es indispensable que los usuarios de la aplicación den permiso para obtener su localización de forma periódica. En principio estará fijado a un intervalo de tiempo, pero sería deseable 
+jugar con la variación de la ubicación para alargar o disminuir la frecuencia. Por ejemplo, si un usuario está en el trabajo, la aplicación acabaría alargando el periodo de tiempo porque la ubicación no varia apenas. 
+
+Esta localización se almacenaría, junto al id del usuario y el instante en el que se ha actualizado por última vez.
+
+\section{Alerta}
+
+Un usuario que tenga problemas dispararía una alerta (/alert POST):
+
+\begin{enumerate}
+  \item Se crea la alerta, que no es más que un registro con su id además del id del usuario que la ha creado y su estado: activa o inactiva.
+  \item Entraría en un bucle mientras la alerta esté activa:
+  \begin{enumerate}
+    \item Busca a todos los usuarios cerca (un radio fijado) de la víctima con última actualización hace menos de un tiempo determinado.
+    \item A estos usuarios les manda una notificación push (si no se les ha enviado ya para esa alerta).
+  \end{enumerate}
+\end{enumerate}
+
+
+\section{Ayuda}
+
+Los usuarios que reciban la notificación podrán acceder en tiempo real a la ubicación de la víctima.
+
+Se abriría un websocket, que mientras la alerta esté activa, enviará de forma periódica la última ubicación conocida de la persona que necesita ayuda.
