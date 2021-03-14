@@ -29,8 +29,11 @@ app.post('/location/:id', body('latLong').isLatLong(), async (req, res) => {
   try {
     await service.writeLocation(location);
     return res.status(200).end();
-  } catch {
-    res.status(500).send('An unknown error ocurred');
+  } catch(err) {
+    if (err.stack.statusCode === 409)
+      return res.status(409).send('Users location was already being updated, try again');
+    else
+      return res.status(500).send('An unknown error ocurred');
   }
 });
 
