@@ -2,9 +2,13 @@ import 'package:app/map.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlng/latlng.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
+import 'package:app/background-service.dart' as BackgroundService;
 
+Future main() async {
+  await DotEnv.load();
+  await BackgroundService.init();
 
-void main() {
   runApp(MyApp());
 }
 
@@ -32,21 +36,26 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   Position _currentPosition;
 
   _MyHomePageState() {
     final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
     geolocator
-      .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
-      .then((Position position) {
-        print('${position.latitude} ${position.longitude}');
-        setState(() {
-          _currentPosition = position;
-        });
-      }).catchError((e) {
-        print(e);
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((Position position) {
+      print('${position.latitude} ${position.longitude}');
+      setState(() {
+        _currentPosition = position;
       });
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    BackgroundService.destroy();
   }
 
   @override
@@ -55,9 +64,12 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: _currentPosition == null ? Text('Loading') : Center(
-        child: MyMap(location:LatLng(_currentPosition.latitude, _currentPosition.longitude))
-      ),
+      body: _currentPosition == null
+          ? Text('Loading')
+          : Center(
+              child: MyMap(
+                  location: LatLng(
+                      _currentPosition.latitude, _currentPosition.longitude))),
     );
   }
 }
