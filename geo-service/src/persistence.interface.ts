@@ -7,11 +7,11 @@ export interface Persistence {
 export class UnknownError implements Error {
   name: string;
   message: string;
-  stack?: string | undefined;
+  originalError?: any;
 
-  constructor(stack?: string | undefined) {
+  constructor(originalError: any) {
     this.name = 'Unknown Error';
     this.message = 'An unknown error ocurred interacting with the database';
-    this.stack = stack;
+    this.originalError = originalError;
   }
 }
