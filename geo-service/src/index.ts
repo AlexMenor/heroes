@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import app from './app'
+import app from './app';
 import { CouchPersistence } from './couch-persistence';
 import Service from './service';
 

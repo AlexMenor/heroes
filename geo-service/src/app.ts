@@ -7,7 +7,6 @@ import Service from './service';
 const app = express();
 app.use(express.json());
 
-
 app.post('/location/:id', body('latLong').isLatLong(), async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty())
@@ -22,16 +21,14 @@ app.post('/location/:id', body('latLong').isLatLong(), async (req, res) => {
     updatedAt: new Date().getTime(),
   };
 
-  const service: Service = app.get('service')
+  const service: Service = app.get('service');
 
   try {
     await service.writeLocation(location);
     return res.status(200).end();
-  } catch(err) {
-    if (err.originalError.statusCode === 409)
-      return res.status(409).send('Users location was already being updated, try again');
-    else
-      return res.status(500).send('An unknown error ocurred');
+  } catch (err) {
+    if (err.name === 'Conflict Error') return res.status(409).send(err.message);
+    else return res.status(500).send(err.message);
   }
 });
 

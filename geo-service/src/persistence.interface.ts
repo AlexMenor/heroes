@@ -7,11 +7,19 @@ export interface Persistence {
 export class UnknownError implements Error {
   name: string;
   message: string;
-  originalError?: any;
 
-  constructor(originalError: any) {
+  constructor() {
     this.name = 'Unknown Error';
     this.message = 'An unknown error ocurred interacting with the database';
-    this.originalError = originalError;
+  }
+}
+
+export class ConflictError implements Error {
+  name: string;
+  message: string;
+
+  constructor() {
+    this.name = 'Conflict Error';
+    this.message = 'Users location was already being updated, try again';
   }
 }

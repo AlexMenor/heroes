@@ -1,6 +1,10 @@
-import Nano from 'nano';
+import Nano, { RequestError } from 'nano';
 
-import { Persistence, UnknownError } from './persistence.interface';
+import {
+  ConflictError,
+  Persistence,
+  UnknownError,
+} from './persistence.interface';
 import { Location } from './location.type';
 
 export class CouchPersistence implements Persistence {
@@ -24,7 +28,10 @@ export class CouchPersistence implements Persistence {
     try {
       await this.db.insert({ ...location, _rev });
     } catch (err) {
-      throw new UnknownError(err);
+      const requestError = err as RequestError;
+
+      if (requestError.statusCode === 409) throw new ConflictError();
+      else throw new UnknownError();
     }
   }
 }
