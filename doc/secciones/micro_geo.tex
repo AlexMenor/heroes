@@ -25,3 +25,8 @@ Un usuario que tenga problemas dispararía una alerta (HU #10) (/alert POST):
 Los usuarios que reciban la notificación podrán acceder en tiempo real a la ubicación de la víctima (HU #11).
 
 Se abriría un websocket, que mientras la alerta esté activa, enviará de forma periódica la última ubicación conocida de la persona que necesita ayuda.
+
+Utilizo websockets para esto último porque permite al servidor hacer "push" de información sin que el cliente tenga que hacer "polling".
+He considerado que podría utilizar otros protocolos como SSE (server sent events) y una implementación más peer to peer con WebRTC por ejemplo, conectando directamente los dispositivos interesados.
+
+Es cierto que quitaría carga al servidor, pero también aumentaria la complejidad.
