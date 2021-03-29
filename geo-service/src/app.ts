@@ -1,6 +1,7 @@
 import express from 'express';
 
 import { body, validationResult } from 'express-validator';
+import { Location } from './location.type';
 
 import Service from './service';
 
@@ -14,10 +15,12 @@ app.post('/location/:id', body('latLong').isLatLong(), async (req, res) => {
 
   const [lat, long] = req.body.latLong.split(',');
 
-  const location = {
+  const location: Location = {
     _id: (req.params as Record<string, string>).id,
-    lat: parseFloat(lat),
-    long: parseFloat(long),
+    loc: {
+      type: 'Point',
+      coordinates: [parseFloat(long), parseFloat(lat)],
+    },
     updatedAt: new Date().getTime(),
   };
 

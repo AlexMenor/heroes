@@ -1,10 +1,13 @@
 import 'dotenv/config';
 
 import app from './app';
-import { CouchPersistence } from './couch-persistence';
 import Service from './service';
 
-app.set('service', new Service(new CouchPersistence()));
+import MongoPersistance from './mongo.persistence';
+
+const mongoPersistance = new MongoPersistance();
+
+app.set('service', new Service(mongoPersistance));
 
 const { PORT } = process.env;
 

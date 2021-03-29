@@ -1,9 +1,15 @@
-version: "3.9"
+version: '3.9'
+
 services:
-  db:
-    image: couchdb:3
-    ports:
-      - "5984:5984"
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
     environment:
-      COUCHDB_USER: admin
-      COUCHDB_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: heroes
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
