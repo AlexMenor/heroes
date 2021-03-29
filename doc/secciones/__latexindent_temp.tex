@@ -1,9 +1,19 @@
-\chapter{Cómo usar los mapas en la aplicación}
+\chapter{Elección de una base de datos para el microservicio de geolocalización}
 
-Hay dos componentes:
- \begin{itemize}
-   \item Provider de mapas: Proporcionan los "tiles" que no son más que imágenes que forman el mapa. OpenStreetMap por ejemplo.
-   \item Controlador: Se encarga de cargar y mostrar los tiles en la pantalla, además de reaccionar a los gestos que hace el usuario para moverse por el mapa. 
- \end{itemize}
+\section{Características deseadas}
+Necesito una base de datos que soporte un gran volumen de operaciones y permita consultas basadas en localizaciones geográficas. Es decir, en el CAP Theorem necesito la A y la P.
+En esta base de datos se almacenará de manera periódica la ubicación de cada uno de los usuarios con el fin de una consulta posterior, que nos permita saber qué usuarios
+están cerca de una persona que necesita ayuda. Por ello, es más que suficiente la consistencia eventual.
 
- Estoy utilizando \href{https://wiki.openstreetmap.org/wiki/Tiles}{openstreetmap como provider}. Y como controlador \href{https://pub.dev/packages/map}{este} porque es bastante maduro, customizable y compatible con cualquier provider.
+\section{Opciones}
+
+MongoDB tiene buen soporte para geo-queries, de hecho vienen ya instaladas, pero mongo prioriza la consistencia antes que la disponibilidad. Postgres, con PostGIS, también soporta bien
+este tipo de consultas, pero prioriza la consistencia a la tolerancia a la partición. \\
+CouchDB, Dynamo y Cassandra son sistemas con alta disponibilidad y tolerancia a la partición. CouchDB es la mejor opción porque Dynamo es privativa y Cassandra es más adecuada para aplicaciones con más
+escrituras que actualizacioens. 
+
+Tras usar couchDB me di cuenta de que el soporte para queries de geolocalización \href{https://docs.couchdb.org/en/stable/ddocs/search.html?highlight=geospatial#geographical-searches}{no es bueno}.
+
+Opto por probar ahora con MongoDB que \href{https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb}{sí tiene buen soporte}.
+
+Además, puedo habilitar la escritura en replicas para cambiar la consistencia por consistencia eventual y tener más disponibilidad. \href{https://stackoverflow.com/questions/11292215/where-does-mongodb-stand-in-the-cap-theorem}{Explicado aquí.}
