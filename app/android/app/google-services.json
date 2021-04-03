@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "216866725979",
+    "project_id": "heroes-f1fb7",
+    "storage_bucket": "heroes-f1fb7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216866725979:android:7c0ea1b7848b2f8f149f7e",
+        "android_client_info": {
+          "package_name": "com.heroes.heroes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "216866725979-1voi5rtdqv0iifkau4n2njddjos99vmi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAC4T_lWegDWGC1dS3rIfaxFSF_ZwyO3U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "216866725979-1voi5rtdqv0iifkau4n2njddjos99vmi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

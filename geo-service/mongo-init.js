@@ -10,3 +10,5 @@ db.createUser({
     },
   ],
 });
+
+db.locations.createIndex({ loc: '2dsphere' });

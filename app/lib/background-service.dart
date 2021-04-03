@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:background_location/background_location.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future init() async {
   BackgroundLocation.getPermissions(
@@ -25,7 +26,10 @@ destroy() {
 }
 
 Future postLocation(Location location) async {
-  final response = await http.post(Uri.https(env['ENDPOINT'], '/location/4'),
+  final fbm = FirebaseMessaging();
+  final userId = await fbm.getToken();
+  
+  final response = await http.post(Uri.https(env['ENDPOINT'], '/location/$userId'),
       body: jsonEncode(<String, String>{
         'latLong': '${location.latitude},${location.longitude}',
       }),

@@ -1,16 +1,15 @@
 import request from 'supertest';
 
 import app from '../app';
-import { ConflictError, Persistence } from '../persistence.interface';
+import { ConflictError } from '../errors';
 import Service from '../service';
+import { MockNotificationSystem, MockPersistence } from './base-mocks';
 
-const mockPersistence: Persistence = {
-  async writeLocation(): Promise<void> {
-    return;
-  },
-};
+const mockPersistence = new MockPersistence();
 
-app.set('service', new Service(mockPersistence));
+const mockNotificationSystem = new MockNotificationSystem();
+
+app.set('service', new Service(mockPersistence, mockNotificationSystem));
 
 describe('POST /location/:id', () => {
   const url = '/location/4';
@@ -20,6 +19,11 @@ describe('POST /location/:id', () => {
   });
 
   test('It should return 200 if a the location is successfully posted', async () => {
+    jest
+      .spyOn(mockPersistence, 'writeLocation')
+      .mockImplementation(async () => {
+        return;
+      });
     await request(app).post(url).send({ latLong: '4,-4' }).expect(200);
   });
 
@@ -27,7 +31,7 @@ describe('POST /location/:id', () => {
     jest
       .spyOn(mockPersistence, 'writeLocation')
       .mockImplementation(async () => {
-        throw new ConflictError();
+        throw new ConflictError('Conflict');
       });
 
     await request(app).post(url).send({ latLong: '4,-4' }).expect(409);

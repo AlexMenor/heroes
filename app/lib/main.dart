@@ -1,4 +1,5 @@
 import 'package:app/map.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlng/latlng.dart';
@@ -38,7 +39,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Position _currentPosition;
 
-  _MyHomePageState() {
+  @override
+  void initState(){
+    super.initState();
+
+    final fbm = FirebaseMessaging();
+
     final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
     geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
