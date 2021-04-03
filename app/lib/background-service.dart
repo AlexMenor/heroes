@@ -29,7 +29,7 @@ Future postLocation(Location location) async {
   final fbm = FirebaseMessaging();
   final userId = await fbm.getToken();
   
-  final response = await http.post(Uri.https(env['ENDPOINT'], '/location/$userId'),
+  final response = await http.put(Uri.https(env['ENDPOINT'], '/location/$userId'),
       body: jsonEncode(<String, String>{
         'latLong': '${location.latitude},${location.longitude}',
       }),

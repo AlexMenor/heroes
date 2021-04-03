@@ -9,7 +9,7 @@ import Service from './service';
 const app = express();
 app.use(express.json());
 
-app.post('/location/:id', body('latLong').isLatLong(), async (req, res) => {
+app.put('/location/:id', body('latLong').isLatLong(), async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty())
     return res.status(400).json({ errors: errors.array() });
