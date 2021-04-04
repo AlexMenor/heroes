@@ -18,7 +18,7 @@ describe('PUT /location/:id', () => {
     await request(app).put(url).send({ latLong: 'not valid' }).expect(400);
   });
 
-  test('It should return 200 if a the location is successfully puted', async () => {
+  test('It should return 200 if a the location is successfully put', async () => {
     jest
       .spyOn(mockPersistence, 'writeLocation')
       .mockImplementation(async () => {
