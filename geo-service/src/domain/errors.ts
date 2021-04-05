@@ -1,4 +1,4 @@
-export type ErrorType = 'Unknown Error' | 'Conflict Error';
+export type ErrorType = 'Unknown Error' | 'Conflict Error' | 'Not Found Error';
 
 export class TypedError implements Error {
   name: ErrorType;
@@ -26,6 +26,16 @@ export class ConflictError implements Error {
 
   constructor(message: string) {
     this.name = 'Conflict Error';
+    this.message = message;
+  }
+}
+
+export class NotFoundError implements Error {
+  name: ErrorType;
+  message: string;
+
+  constructor(message: string) {
+    this.name = 'Not Found Error';
     this.message = message;
   }
 }

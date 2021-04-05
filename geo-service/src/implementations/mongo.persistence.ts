@@ -2,7 +2,7 @@ import { Collection, MongoClient } from 'mongodb';
 import { v4 as uuid } from 'uuid';
 
 import { Alert } from '../domain/alert.type';
-import { UnknownError } from '../domain/errors';
+import { NotFoundError, UnknownError } from '../domain/errors';
 import { Location } from '../domain/location.type';
 import { Persistence } from '../interfaces/persistence.interface';
 
@@ -73,5 +73,25 @@ export default class MongoPersistence implements Persistence {
     });
 
     return await result.limit(maxUsers).toArray();
+  }
+
+  async getAlert(alertId: string): Promise<Alert> {
+    const result = await this.alerts.findOne({ _id: alertId });
+
+    if (!result) throw new NotFoundError('Alert not found');
+
+    return result;
+  }
+
+  async getLocation(locationId: string): Promise<Location> {
+    const result = await this.locations.findOne({ _id: locationId });
+
+    if (!result) throw new NotFoundError('Location not found');
+
+    return result;
+  }
+
+  async setAlertInactive(alertId: string): Promise<void> {
+    await this.alerts.updateOne({ _id: alertId }, { status: 'INACTIVE' });
   }
 }

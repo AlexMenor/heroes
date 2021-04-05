@@ -14,4 +14,10 @@ export interface Persistence {
     maxUsers: number,
     millisecondsFromLastUpdate: number,
   ): Promise<Location[]>;
+
+  getAlert(alertId: string): Promise<Alert>;
+
+  getLocation(locationId: string): Promise<Location>;
+
+  setAlertInactive(alertId: string): Promise<void>;
 }

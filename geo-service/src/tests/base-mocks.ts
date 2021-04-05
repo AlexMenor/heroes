@@ -5,6 +5,15 @@ import { NotificationSystem } from '../interfaces/notification-system.interface'
 import { Persistence } from '../interfaces/persistence.interface';
 
 export class MockPersistence implements Persistence {
+  getAlert(alertId: string): Promise<Alert> {
+    throw new Error('Method not implemented.');
+  }
+  getLocation(locationId: string): Promise<Location> {
+    throw new Error('Method not implemented.');
+  }
+  setAlertInactive(alertId: string): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
   writeLocation(location: Location): Promise<void> {
     throw new Error('Method not implemented.');
   }
