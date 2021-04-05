@@ -92,6 +92,9 @@ export default class MongoPersistence implements Persistence {
   }
 
   async setAlertInactive(alertId: string): Promise<void> {
-    await this.alerts.updateOne({ _id: alertId }, { status: 'INACTIVE' });
+    await this.alerts.updateOne(
+      { _id: alertId },
+      { $set: { status: 'INACTIVE' } },
+    );
   }
 }

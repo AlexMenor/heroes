@@ -85,7 +85,18 @@ export default class Service {
           'Alert or location not found when checking if its inactive',
         );
       else
-        console.log('Unknown error when checking if the alert its innactive');
+        console.log(
+          'Unknown error when checking if the alert its innactive',
+          err,
+        );
     }
+  }
+
+  getAlert(alertId: string): Promise<Alert> {
+    return this.persistence.getAlert(alertId);
+  }
+
+  getLocation(locationId: string): Promise<Location> {
+    return this.persistence.getLocation(locationId);
   }
 }
