@@ -1,10 +1,10 @@
 import { Collection, MongoClient } from 'mongodb';
 import { v4 as uuid } from 'uuid';
 
-import { Alert } from './alert.type';
-import { UnknownError } from './errors';
-import { Location } from './location.type';
-import { Persistence } from './persistence.interface';
+import { Alert } from '../domain/alert.type';
+import { UnknownError } from '../domain/errors';
+import { Location } from '../domain/location.type';
+import { Persistence } from '../interfaces/persistence.interface';
 
 export default class MongoPersistence implements Persistence {
   private locations!: Collection<Location>;

@@ -1,7 +1,7 @@
-import { NotificationSystem } from './notification-system.interface';
+import { NotificationSystem } from '../interfaces/notification-system.interface';
 import admin, { messaging, ServiceAccount } from 'firebase-admin';
 
-import key from '../serviceAccountKey.json';
+import key from '../../serviceAccountKey.json';
 
 export class FBMNotificationSystem implements NotificationSystem {
   private readonly messaging: messaging.Messaging;

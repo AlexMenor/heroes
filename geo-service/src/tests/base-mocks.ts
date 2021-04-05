@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Alert } from '../alert.type';
-import { Location } from '../location.type';
-import { NotificationSystem } from '../notification-system.interface';
-import { Persistence } from '../persistence.interface';
+import { Alert } from '../domain/alert.type';
+import { Location } from '../domain/location.type';
+import { NotificationSystem } from '../interfaces/notification-system.interface';
+import { Persistence } from '../interfaces/persistence.interface';
 
 export class MockPersistence implements Persistence {
   writeLocation(location: Location): Promise<void> {

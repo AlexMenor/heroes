@@ -3,8 +3,8 @@ import 'dotenv/config';
 import app from './app';
 import Service from './service';
 
-import MongoPersistance from './mongo.persistence';
-import { FBMNotificationSystem } from './fbm.notification-system';
+import MongoPersistance from './implementations/mongo.persistence';
+import { FBMNotificationSystem } from './implementations/fbm.notification-system';
 
 const mongoPersistance = new MongoPersistance();
 const fbmNotifications = new FBMNotificationSystem();

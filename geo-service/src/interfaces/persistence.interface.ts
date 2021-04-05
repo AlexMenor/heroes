@@ -1,5 +1,5 @@
-import { Alert } from './alert.type';
-import { Location } from './location.type';
+import { Alert } from '../domain/alert.type';
+import { Location } from '../domain/location.type';
 
 export interface Persistence {
   writeLocation(location: Location): Promise<void>;

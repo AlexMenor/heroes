@@ -1,7 +1,7 @@
 import request from 'supertest';
 
 import app from '../app';
-import { ConflictError } from '../errors';
+import { ConflictError } from '../domain/errors';
 import Service from '../service';
 import { MockNotificationSystem, MockPersistence } from './base-mocks';
 

@@ -1,8 +1,8 @@
 import express from 'express';
 
 import { body, validationResult } from 'express-validator';
-import { ErrorType } from './errors';
-import { Location } from './location.type';
+import { ErrorType } from './domain/errors';
+import { Location } from './domain/location.type';
 
 import Service from './service';
 
