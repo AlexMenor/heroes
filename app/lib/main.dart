@@ -137,6 +137,7 @@ class _MyAppState extends State<MyApp> {
   void _startLocator() {
     BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
         initCallback: LocationCallbackHandler.initCallback,
+        initDataCallback: {"hello":"hello"},
         disposeCallback: LocationCallbackHandler.disposeCallback,
         iosSettings: IOSSettings(
             accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),

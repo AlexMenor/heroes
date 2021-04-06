@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'dart:convert';
 
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:background_locator/location_dto.dart';
@@ -14,6 +15,7 @@ class LocationCallbackHandler {
   static const String isolateName = 'LocatorIsolate';
 
   static Future<void> initCallback(Map<dynamic, dynamic> params) async {
+    print(params);
     print("Location Callback Handler INIT");
   }
 
@@ -34,8 +36,10 @@ class LocationCallbackHandler {
 
   static Future _postLocation(LocationDto location) async {
 
-    final userId = "Static";
     await DotEnv.load();
+
+    final fbm = FirebaseMessaging();
+    final userId = await fbm.getToken();
 
     final response = await http.put(Uri.https(DotEnv.env['ENDPOINT'], '/location/$userId'),
         body: jsonEncode(<String, String>{
