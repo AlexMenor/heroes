@@ -78,13 +78,16 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
         title: 'Héroes',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
+            primarySwatch: Colors.indigo,
+            visualDensity: VisualDensity.adaptivePlatformDensity),
         home: Scaffold(
             appBar: AppBar(
-              title: const Text('Héroes'),
-            ),
+                title: Row(
+              children: [
+                Image.asset('assets/logo.png', height: 45.0),
+              ],
+              mainAxisAlignment: MainAxisAlignment.start,
+            )),
             body: ChangeNotifierProvider(
                 create: (_) => this.geolocalizationModel,
                 child: CurrentLocalization())));
