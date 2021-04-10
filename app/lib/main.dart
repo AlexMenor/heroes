@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:app/current_localization.dart';
+import 'package:app/geolocalization_model.dart';
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/settings/android_settings.dart';
@@ -10,9 +12,8 @@ import 'package:background_locator/settings/locator_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
-
+import 'package:provider/provider.dart';
 
 import 'location_callback_handler.dart';
 
@@ -31,14 +32,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   ReceivePort port = ReceivePort();
 
-  bool isRunning;
+  final GeolocalizationModel geolocalizationModel = GeolocalizationModel();
 
   @override
   void initState() {
     super.initState();
 
     if (IsolateNameServer.lookupPortByName(
-        LocationCallbackHandler.isolateName) !=
+            LocationCallbackHandler.isolateName) !=
         null) {
       IsolateNameServer.removePortNameMapping(
           LocationCallbackHandler.isolateName);
@@ -48,67 +49,46 @@ class _MyAppState extends State<MyApp> {
         port.sendPort, LocationCallbackHandler.isolateName);
 
     port.listen(
-          (dynamic data) async {
-            print("DATA");
-            print(data);
+      (dynamic data) async {
+        final locationDto = data as LocationDto;
+        geolocalizationModel.updateLocation(HeroLocation(
+            latitude: locationDto.latitude, longitude: locationDto.longitude));
       },
     );
     initPlatformState();
   }
 
-
   Future<void> initPlatformState() async {
     await BackgroundLocator.initialize();
     final _isRunning = await BackgroundLocator.isServiceRunning();
-    setState(() {
-      isRunning = _isRunning;
-    });
+    geolocalizationModel.updateServiceRunning(_isRunning);
 
     if (!_isRunning && await _checkLocationPermission()) {
-      final fbm = FirebaseMessaging();
-      final userId = await fbm.getToken();
-      print(userId);
       _startLocator();
       final _isRunning = await BackgroundLocator.isServiceRunning();
 
-      setState(() {
-        isRunning = _isRunning;
-      });
+      geolocalizationModel.updateServiceRunning(_isRunning);
     } else {
       // Handle
     }
-
-
   }
 
   @override
   Widget build(BuildContext context) {
-    String msgStatus = "-";
-    if (isRunning != null) {
-      if (isRunning) {
-        msgStatus = 'Is running';
-      } else {
-        msgStatus = 'Is not running';
-      }
-    }
-    final status = Text("Status: $msgStatus");
-
-
     return MaterialApp(
-      title: 'Héroes',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Héroes'),
+        title: 'Héroes',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        body: status
-          ),
-        );
+        home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Héroes'),
+            ),
+            body: ChangeNotifierProvider(
+                create: (_) => this.geolocalizationModel,
+                child: CurrentLocalization())));
   }
-
 
   Future<bool> _checkLocationPermission() async {
     final access = await LocationPermissions().checkPermissionStatus();
@@ -137,7 +117,6 @@ class _MyAppState extends State<MyApp> {
   void _startLocator() {
     BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
         initCallback: LocationCallbackHandler.initCallback,
-        initDataCallback: {"hello":"hello"},
         disposeCallback: LocationCallbackHandler.disposeCallback,
         iosSettings: IOSSettings(
             accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),
@@ -152,10 +131,10 @@ class _MyAppState extends State<MyApp> {
                 notificationTitle: 'Start Location Tracking',
                 notificationMsg: 'Track location in background',
                 notificationBigMsg:
-                'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
+                    'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
                 notificationIcon: '',
                 notificationIconColor: Colors.grey,
                 notificationTapCallback:
-                LocationCallbackHandler.notificationCallback)));
+                    LocationCallbackHandler.notificationCallback)));
   }
 }
