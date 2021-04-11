@@ -54,6 +54,10 @@ export default class Service {
     return createdAlert;
   }
 
+  async setAlertInactive(alertId: string): Promise<void> {
+    await this.persistence.setAlertInactive(alertId);
+  }
+
   private async setAlertInactiveIfUserStoppedUpdating(
     alert: Alert,
   ): Promise<void> {

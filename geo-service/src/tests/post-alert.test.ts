@@ -35,7 +35,7 @@ describe('POST /alert', () => {
       .spyOn(mockPersistence, 'getUsersCloseToAlert')
       .mockImplementation(async () => []);
 
-    await request(app).post(url).send({ userId: '4' }).expect(200);
+    await request(app).post(url).send({ userId: '4' }).expect(201);
   });
 
   test('It should return 409 if the user has already an alert going on', async () => {

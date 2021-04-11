@@ -54,4 +54,17 @@ app.post('/alert', body('userId').isString(), async (req, res) => {
   }
 });
 
+app.delete('/alert/:id', async (req, res) => {
+  const service: Service = app.get('service');
+
+  try {
+    await service.setAlertInactive(req.params.id);
+    return res.status(200).end();
+  } catch (err) {
+    if (err.name === ('Not Found Error' as ErrorType))
+      return res.status(404).send(err.message);
+    else return res.status(500).send(err.message);
+  }
+});
+
 export default app;
