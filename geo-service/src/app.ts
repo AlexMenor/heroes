@@ -47,7 +47,7 @@ app.post('/alert', body('userId').isString(), async (req, res) => {
 
   try {
     const alert = await service.createAlert(req.body.userId);
-    return res.json(alert).status(201);
+    return res.status(201).send(alert);
   } catch (err) {
     if (err.name === 'Conflict Error') return res.status(409).send(err.message);
     else return res.status(500).send(err.message);
