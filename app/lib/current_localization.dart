@@ -15,22 +15,22 @@ class CurrentLocalization extends StatelessWidget {
         geoModel.currentLocation.latitude, geoModel.currentLocation.longitude);
 
     return FlutterMap(
-      options: MapOptions(
-        center: currentLatLng,
-        zoom: 13.0,
-      ),
+      options: MapOptions(center: currentLatLng, zoom: 17.0),
       layers: [
         TileLayerOptions(
-            urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            subdomains: ['a', 'b', 'c']),
+          urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          subdomains: ['a', 'b', 'c'],
+        ),
         MarkerLayerOptions(
           markers: [
             Marker(
-              width: 80.0,
-              height: 80.0,
+              width: 20.0,
+              height: 20.0,
               point: currentLatLng,
               builder: (ctx) => Container(
-                child: FlutterLogo(),
+                child: Image.asset(
+                  'assets/current_position_marker.png',
+                ),
               ),
             ),
           ],
