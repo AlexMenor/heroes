@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:app/current_localization.dart';
+import 'package:app/alert_model.dart';
+import 'package:app/home_status.dart';
 import 'package:app/geolocalization_model.dart';
+import 'package:app/heroes_fab.dart';
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/settings/android_settings.dart';
@@ -21,7 +23,12 @@ Future main() async {
   await DotEnv.load();
   await Firebase.initializeApp();
 
-  runApp(MyApp());
+  final appWithAlertProvider = ChangeNotifierProvider(
+    create: (_) => AlertModel(),
+    child: MyApp(),
+  );
+
+  runApp(appWithAlertProvider);
 }
 
 class MyApp extends StatefulWidget {
@@ -76,21 +83,25 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Héroes',
-        theme: ThemeData(
-            primarySwatch: Colors.indigo,
-            visualDensity: VisualDensity.adaptivePlatformDensity),
-        home: Scaffold(
-            appBar: AppBar(
-                title: Row(
+      title: 'Héroes',
+      theme: ThemeData(
+          primarySwatch: Colors.indigo,
+          visualDensity: VisualDensity.adaptivePlatformDensity),
+      home: Scaffold(
+          appBar: AppBar(
+            title: Row(
               children: [
                 Image.asset('assets/logo.png', height: 45.0),
               ],
               mainAxisAlignment: MainAxisAlignment.start,
-            )),
-            body: ChangeNotifierProvider(
-                create: (_) => this.geolocalizationModel,
-                child: CurrentLocalization())));
+            ),
+          ),
+          body: ChangeNotifierProvider(
+            create: (_) => this.geolocalizationModel,
+            child: HomeStatus(),
+          ),
+          floatingActionButton: HeroesFab()),
+    );
   }
 
   Future<bool> _checkLocationPermission() async {
