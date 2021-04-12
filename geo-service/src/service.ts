@@ -46,7 +46,7 @@ export default class Service {
     );
 
     const notifications = closeToAlertUsers.map((location) =>
-      this.notificationSystem.sendNotification(location._id),
+      this.notificationSystem.sendNotification(location._id, createdAlert._id),
     );
 
     await Promise.all(notifications);

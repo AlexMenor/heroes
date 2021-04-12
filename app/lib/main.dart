@@ -11,6 +11,7 @@ import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/settings/android_settings.dart';
 import 'package:background_locator/settings/ios_settings.dart';
 import 'package:background_locator/settings/locator_settings.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
@@ -23,12 +24,7 @@ Future main() async {
   await DotEnv.load();
   await Firebase.initializeApp();
 
-  final appWithAlertProvider = ChangeNotifierProvider(
-    create: (_) => AlertModel(),
-    child: MyApp(),
-  );
-
-  runApp(appWithAlertProvider);
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -41,9 +37,24 @@ class _MyAppState extends State<MyApp> {
 
   final GeolocalizationModel geolocalizationModel = GeolocalizationModel();
 
+  final AlertModel alertModel = AlertModel();
+
   @override
   void initState() {
     super.initState();
+
+    final fcm = FirebaseMessaging();
+
+    fcm.configure(onMessage: (data) {
+      alertModel.registerPendingAlert(data['data']['alertId']);
+      return;
+    }, onResume: (data) {
+      alertModel.registerPendingAlert(data['data']['alertId']);
+      return;
+    }, onLaunch: (data) {
+      alertModel.watchAlert(data['data']['alertId']);
+      return;
+    });
 
     if (IsolateNameServer.lookupPortByName(
             LocationCallbackHandler.isolateName) !=
@@ -82,12 +93,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Héroes',
-      theme: ThemeData(
-          primarySwatch: Colors.indigo,
-          visualDensity: VisualDensity.adaptivePlatformDensity),
-      home: Scaffold(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => this.geolocalizationModel),
+        ChangeNotifierProvider(create: (_) => this.alertModel),
+      ],
+      child: MaterialApp(
+        title: 'Héroes',
+        theme: ThemeData(
+            primarySwatch: Colors.indigo,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+            accentColor: Colors.orangeAccent),
+        home: Scaffold(
           appBar: AppBar(
             title: Row(
               children: [
@@ -96,11 +113,10 @@ class _MyAppState extends State<MyApp> {
               mainAxisAlignment: MainAxisAlignment.start,
             ),
           ),
-          body: ChangeNotifierProvider(
-            create: (_) => this.geolocalizationModel,
-            child: HomeStatus(),
-          ),
-          floatingActionButton: HeroesFab()),
+          body: HomeStatus(),
+          floatingActionButton: HeroesFab(),
+        ),
+      ),
     );
   }
 

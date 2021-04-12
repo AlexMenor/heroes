@@ -2,13 +2,13 @@ import 'package:app/alert_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class AlertStatus extends StatelessWidget {
+class EmittingAlertStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final alertModel = Provider.of<AlertModel>(context);
 
     return AnimatedOpacity(
-      opacity: alertModel.thereIsAnAlertActive ? 1.0 : 0.0,
+      opacity: alertModel.alertState == AlertState.EMITTING_ALERT ? 1.0 : 0.0,
       duration: Duration(milliseconds: 150),
       child: Container(
         width: double.infinity,

@@ -1,3 +1,3 @@
 export interface NotificationSystem {
-  sendNotification(userId: string): Promise<void>;
+  sendNotification(userId: string, alertId: string): Promise<void>;
 }

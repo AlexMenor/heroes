@@ -11,9 +11,15 @@ export class FBMNotificationSystem implements NotificationSystem {
     });
     this.messaging = admin.messaging();
   }
-  async sendNotification(userId: string): Promise<void> {
+  async sendNotification(userId: string, alertId: string): Promise<void> {
     await this.messaging.sendToDevice(userId, {
-      notification: { body: 'alert' },
+      notification: {
+        body: 'alert',
+        clickAction: 'FLUTTER_NOTIFICATION_CLICK',
+      },
+      data: {
+        alertId,
+      },
     });
   }
 }
