@@ -3,6 +3,7 @@ import { ConflictError, ErrorType } from './domain/errors';
 import { Location } from './domain/location.type';
 import { NotificationSystem } from './interfaces/notification-system.interface';
 import { Persistence } from './interfaces/persistence.interface';
+import { Publisher } from './interfaces/publisher.interface';
 
 export default class Service {
   private readonly ALERT_RADIUS_DISTANCE_IN_METERS = 500;
@@ -13,10 +14,12 @@ export default class Service {
   constructor(
     private readonly persistence: Persistence,
     private readonly notificationSystem: NotificationSystem,
+    private readonly publisher: Publisher,
   ) {}
 
   async writeLocation(location: Location): Promise<void> {
     await this.persistence.writeLocation(location);
+    this.publisher.publish(location);
   }
 
   async createAlert(userId: string): Promise<Alert> {
@@ -56,6 +59,7 @@ export default class Service {
 
   async setAlertInactive(alertId: string): Promise<void> {
     await this.persistence.setAlertInactive(alertId);
+    this.publisher.publish(await this.persistence.getAlert(alertId));
   }
 
   private async setAlertInactiveIfUserStoppedUpdating(

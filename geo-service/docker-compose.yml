@@ -18,7 +18,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: geo-service
     ports:
       - 3000:3000
     volumes:
       - ./src:/usr/app/src
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379

@@ -2,14 +2,11 @@ import request from 'supertest';
 
 import app from '../app';
 import { NotFoundError } from '../domain/errors';
-import Service from '../service';
-import { MockNotificationSystem, MockPersistence } from './base-mocks';
+import { getMocks } from './base-mocks';
 
-const mockPersistence = new MockPersistence();
+const { mockPersistence, mockService, mockPublisher } = getMocks();
 
-const mockNotificationSystem = new MockNotificationSystem();
-
-app.set('service', new Service(mockPersistence, mockNotificationSystem));
+app.set('service', mockService);
 
 describe('DELETE /alert/:id', () => {
   const url = '/alert/4';
@@ -20,8 +17,18 @@ describe('DELETE /alert/:id', () => {
       .mockImplementation(async () => {
         return;
       });
+    jest.spyOn(mockPersistence, 'getAlert').mockImplementation(async () => ({
+      _id: 'unid',
+      userId: 'otroId',
+      status: 'ACTIVE',
+      createdAt: 0,
+      updatedAt: 0,
+    }));
+    const publish = jest.spyOn(mockPublisher, 'publish');
 
     await request(app).delete(url).expect(200);
+
+    expect(publish).toBeCalledTimes(1);
   });
 
   test('It should return 404 if the alert is not found', async () => {

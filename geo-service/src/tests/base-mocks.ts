@@ -3,6 +3,8 @@ import { Alert } from '../domain/alert.type';
 import { Location } from '../domain/location.type';
 import { NotificationSystem } from '../interfaces/notification-system.interface';
 import { Persistence } from '../interfaces/persistence.interface';
+import { Publisher } from '../interfaces/publisher.interface';
+import Service from '../service';
 
 export class MockPersistence implements Persistence {
   getAlert(alertId: string): Promise<Alert> {
@@ -39,4 +41,36 @@ export class MockNotificationSystem implements NotificationSystem {
   sendNotification(userId: string): Promise<void> {
     throw new Error('Method not implemented.');
   }
+}
+
+export class MockPublisher implements Publisher {
+  async publish(entity: Location | Alert): Promise<void> {
+    return;
+  }
+}
+
+export function getMocks(): {
+  mockPersistence: Persistence;
+  mockNotificationSystem: NotificationSystem;
+  mockPublisher: Publisher;
+  mockService: Service;
+} {
+  const mockPersistence = new MockPersistence();
+
+  const mockNotificationSystem = new MockNotificationSystem();
+
+  const mockPublisher = new MockPublisher();
+
+  const mockService = new Service(
+    mockPersistence,
+    mockNotificationSystem,
+    mockPublisher,
+  );
+
+  return {
+    mockPersistence,
+    mockNotificationSystem,
+    mockPublisher,
+    mockService,
+  };
 }

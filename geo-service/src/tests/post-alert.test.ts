@@ -1,14 +1,11 @@
 import request from 'supertest';
 
 import app from '../app';
-import Service from '../service';
-import { MockNotificationSystem, MockPersistence } from './base-mocks';
+import { getMocks } from './base-mocks';
 
-const mockPersistence = new MockPersistence();
+const { mockPersistence, mockService } = getMocks();
 
-const mockNotificationSystem = new MockNotificationSystem();
-
-app.set('service', new Service(mockPersistence, mockNotificationSystem));
+app.set('service', mockService);
 
 describe('POST /alert', () => {
   const url = '/alert';

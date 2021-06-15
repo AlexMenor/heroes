@@ -7,11 +7,16 @@ import Service from './service';
 import MongoPersistance from './implementations/mongo.persistence';
 import { FBMNotificationSystem } from './implementations/fbm.notification-system';
 import { ErrorType } from './domain/errors';
+import { RedisPublisher } from './implementations/redis.publisher';
 
 const mongoPersistance = new MongoPersistance();
 const fbmNotifications = new FBMNotificationSystem();
+const redisPublisher = new RedisPublisher();
 
-app.set('service', new Service(mongoPersistance, fbmNotifications));
+app.set(
+  'service',
+  new Service(mongoPersistance, fbmNotifications, redisPublisher),
+);
 
 const { PORT } = process.env;
 

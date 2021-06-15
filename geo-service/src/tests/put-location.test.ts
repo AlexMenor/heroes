@@ -2,14 +2,11 @@ import request from 'supertest';
 
 import app from '../app';
 import { ConflictError } from '../domain/errors';
-import Service from '../service';
-import { MockNotificationSystem, MockPersistence } from './base-mocks';
+import { getMocks } from './base-mocks';
 
-const mockPersistence = new MockPersistence();
+const { mockPersistence, mockService, mockPublisher } = getMocks();
 
-const mockNotificationSystem = new MockNotificationSystem();
-
-app.set('service', new Service(mockPersistence, mockNotificationSystem));
+app.set('service', mockService);
 
 describe('PUT /location/:id', () => {
   const url = '/location/4';
@@ -24,7 +21,12 @@ describe('PUT /location/:id', () => {
       .mockImplementation(async () => {
         return;
       });
+
+    const publish = jest.spyOn(mockPublisher, 'publish');
+
     await request(app).put(url).send({ latLong: '4,-4' }).expect(200);
+
+    expect(publish).toBeCalled();
   });
 
   test('It should return 409 if a conflict occours in db', async () => {
