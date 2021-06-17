@@ -14,6 +14,6 @@ export class RedisPublisher implements Publisher {
   }
 
   async publish(entity: Alert | Location): Promise<void> {
-    this.redis.publish(entity._id, JSON.stringify(entity));
+    await this.redis.publish(entity._id, JSON.stringify(entity));
   }
 }
