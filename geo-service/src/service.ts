@@ -6,9 +6,27 @@ import { Persistence } from './interfaces/persistence.interface';
 import { Publisher } from './interfaces/publisher.interface';
 
 export default class Service {
+  /**
+   * Defines the radius in meters that users have to be in
+   * to be notified about an alert.
+   */
   private readonly ALERT_RADIUS_DISTANCE_IN_METERS = 500;
+
+  /**
+   * Max users to be notified about an alert
+   */
   private readonly MAX_USERS_TO_NOTIFY = 50;
+
+  /**
+   * Inactivity threshold to exclude users that didn't
+   * updated their location for a while to be notified about an alert
+   */
   private readonly MILLISECONDS_FROM_LAST_UPDATE = 1000 * 60 * 30;
+
+  /**
+   * If an user that creaeted an alert does not update their location
+   * in this amount of milliseconds, the alert is set as inactive.
+   */
   private readonly MILLISECONDS_TO_SET_ALERT_AS_INACTIVE = 1000 * 60 * 5;
 
   constructor(
@@ -17,11 +35,23 @@ export default class Service {
     private readonly publisher: Publisher,
   ) {}
 
+  /**
+   * Persist an user's location
+   * @param location
+   */
   async writeLocation(location: Location): Promise<void> {
     await this.persistence.writeLocation(location);
     this.publisher.publish(location);
   }
 
+  /**
+   * If the user has no ongoing alert, creates one.
+   * Also activates a job that checks if the user has stopped
+   * updating their location each $MILLISECONDS_TO_SET_ALERT_AS_INACTIVE, if so, sets the alert to inactive.
+   * When the alert is created, users that updated their location less than $MILLISECONDS_FROM_LAST_UPDATE ago
+   * and that are located within a radius of $ALERT_RADIUS_DISTANCE_OF_METERS are notified via the notification service.
+   * @param userId
+   */
   async createAlert(userId: string): Promise<Alert> {
     const userHasAnyActiveAlert = await this.persistence.checkIfUserHasActiveAlerts(
       userId,
@@ -57,11 +87,21 @@ export default class Service {
     return createdAlert;
   }
 
+  /**
+   * Persist an alert as inactive and notifies potential
+   * listeners via the subscription system
+   * @param alertId
+   */
   async setAlertInactive(alertId: string): Promise<void> {
     await this.persistence.setAlertInactive(alertId);
     this.publisher.publish(await this.persistence.getAlert(alertId));
   }
 
+  /**
+   * Job that checks every $MILLISECONDS_TO_SET_ALERT_INACTIVE
+   * if the user that created an active alert is updating their location
+   * @param alert
+   */
   private async setAlertInactiveIfUserStoppedUpdating(
     alert: Alert,
   ): Promise<void> {
