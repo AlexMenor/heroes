@@ -14,7 +14,7 @@ export class FBMNotificationSystem implements NotificationSystem {
   async sendNotification(userId: string, alertId: string): Promise<void> {
     await this.messaging.sendToDevice(userId, {
       notification: {
-        body: 'alert',
+        body: 'Someone nearby needs your help',
         clickAction: 'FLUTTER_NOTIFICATION_CLICK',
       },
       data: {
