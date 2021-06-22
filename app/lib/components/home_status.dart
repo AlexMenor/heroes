@@ -1,11 +1,12 @@
-import 'package:app/alert_model.dart';
-import 'package:app/emitting_alert_status.dart';
-import 'package:app/geolocalization_model.dart';
-import 'package:app/watching_alert_status.dart';
+import 'package:app/providers/alert_model.dart';
+import 'package:app/components/emitting_alert_status.dart';
+import 'package:app/providers/geolocalization_model.dart';
+import 'package:app/components/watching_alert_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong/latlong.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class HomeStatus extends StatelessWidget {
   @override
@@ -34,7 +35,12 @@ class HomeStatus extends StatelessWidget {
 
       defaultMapLocation = currentLatLng;
     } else {
-      return Text("Loading");
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor:
+              AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+        ),
+      );
     }
 
     if (alertModel.helpeeLocation != null) {
@@ -85,8 +91,8 @@ class HomeStatus extends StatelessWidget {
           options: MapOptions(center: defaultMapLocation, zoom: 17.0),
           layers: [
             TileLayerOptions(
-              urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              subdomains: ['a', 'b', 'c'],
+              urlTemplate: env['TILE_PROVIDER_TEMPLATE'],
+              subdomains: env['TILE_PROVIDER_SUBDOMAINS'].split(','),
             ),
             MarkerLayerOptions(
               markers: markers,

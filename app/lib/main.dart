@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:app/alert_model.dart';
-import 'package:app/home_status.dart';
-import 'package:app/geolocalization_model.dart';
-import 'package:app/heroes_fab.dart';
+import 'package:app/providers/alert_model.dart';
+import 'package:app/components/home_status.dart';
+import 'package:app/providers/geolocalization_model.dart';
+import 'package:app/components/heroes_fab.dart';
 import 'package:background_locator/background_locator.dart';
 import 'package:background_locator/location_dto.dart';
 import 'package:background_locator/settings/android_settings.dart';
@@ -43,19 +43,32 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
+    this.configureFCM();
+
+    this.configureBackgroundLocationService();
+  }
+
+  configureFCM() {
     final fcm = FirebaseMessaging();
 
-    fcm.configure(onMessage: (data) {
+    final onAlert = (data) {
       alertModel.registerPendingAlert(data['data']['alertId']);
       return;
-    }, onResume: (data) {
-      alertModel.registerPendingAlert(data['data']['alertId']);
-      return;
-    }, onLaunch: (data) {
+    };
+
+    final onWatchAlert = (data) {
       alertModel.watchAlert(data['data']['alertId']);
       return;
-    });
+    };
 
+    fcm.configure(
+      onMessage: onAlert,
+      onResume: onAlert,
+      onLaunch: onWatchAlert,
+    );
+  }
+
+  configureBackgroundLocationService() async {
     if (IsolateNameServer.lookupPortByName(
             LocationCallbackHandler.isolateName) !=
         null) {
@@ -73,10 +86,7 @@ class _MyAppState extends State<MyApp> {
             latitude: locationDto.latitude, longitude: locationDto.longitude));
       },
     );
-    initPlatformState();
-  }
 
-  Future<void> initPlatformState() async {
     await BackgroundLocator.initialize();
     final _isRunning = await BackgroundLocator.isServiceRunning();
     geolocalizationModel.updateServiceRunning(_isRunning);
@@ -86,38 +96,7 @@ class _MyAppState extends State<MyApp> {
       final _isRunning = await BackgroundLocator.isServiceRunning();
 
       geolocalizationModel.updateServiceRunning(_isRunning);
-    } else {
-      // Handle
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => this.geolocalizationModel),
-        ChangeNotifierProvider(create: (_) => this.alertModel),
-      ],
-      child: MaterialApp(
-        title: 'Héroes',
-        theme: ThemeData(
-            primarySwatch: Colors.indigo,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-            accentColor: Colors.orangeAccent),
-        home: Scaffold(
-          appBar: AppBar(
-            title: Row(
-              children: [
-                Image.asset('assets/logo.png', height: 45.0),
-              ],
-              mainAxisAlignment: MainAxisAlignment.start,
-            ),
-          ),
-          body: HomeStatus(),
-          floatingActionButton: HeroesFab(),
-        ),
-      ),
-    );
   }
 
   Future<bool> _checkLocationPermission() async {
@@ -145,26 +124,60 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _startLocator() {
-    BackgroundLocator.registerLocationUpdate(LocationCallbackHandler.callback,
-        initCallback: LocationCallbackHandler.initCallback,
-        disposeCallback: LocationCallbackHandler.disposeCallback,
-        iosSettings: IOSSettings(
-            accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),
-        autoStop: false,
-        androidSettings: AndroidSettings(
-            accuracy: LocationAccuracy.NAVIGATION,
-            interval: 5,
-            distanceFilter: 0,
-            client: LocationClient.google,
-            androidNotificationSettings: AndroidNotificationSettings(
-                notificationChannelName: 'Location tracking',
-                notificationTitle: 'Start Location Tracking',
-                notificationMsg: 'Track location in background',
-                notificationBigMsg:
-                    'Background location is on to keep the app up-tp-date with your location. This is required for main features to work properly when the app is not running.',
-                notificationIcon: '',
-                notificationIconColor: Colors.grey,
-                notificationTapCallback:
-                    LocationCallbackHandler.notificationCallback)));
+    BackgroundLocator.registerLocationUpdate(
+      LocationCallbackHandler.callback,
+      initCallback: LocationCallbackHandler.initCallback,
+      disposeCallback: LocationCallbackHandler.disposeCallback,
+      iosSettings:
+          IOSSettings(accuracy: LocationAccuracy.NAVIGATION, distanceFilter: 0),
+      autoStop: false,
+      androidSettings: AndroidSettings(
+        accuracy: LocationAccuracy.NAVIGATION,
+        interval: 5,
+        distanceFilter: 0,
+        client: LocationClient.google,
+        androidNotificationSettings: AndroidNotificationSettings(
+          notificationChannelName: 'Location tracking',
+          notificationTitle: 'Héroes Location Service',
+          notificationMsg:
+              'This service runs to keep the app up to date with your location',
+          notificationBigMsg:
+              'Background location is on to keep the app up to date with your location. This is required to know if you are close to someone that needs help.',
+          notificationIcon: '',
+          notificationIconColor: Colors.grey,
+          notificationTapCallback: LocationCallbackHandler.notificationCallback,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => this.geolocalizationModel),
+        ChangeNotifierProvider(create: (_) => this.alertModel),
+      ],
+      child: MaterialApp(
+        title: 'Héroes',
+        theme: ThemeData(
+          primarySwatch: Colors.indigo,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          accentColor: Colors.orangeAccent,
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            title: Row(
+              children: [
+                Image.asset('assets/logo.png', height: 45.0),
+              ],
+              mainAxisAlignment: MainAxisAlignment.start,
+            ),
+          ),
+          body: HomeStatus(),
+          floatingActionButton: HeroesFab(),
+        ),
+      ),
+    );
   }
 }

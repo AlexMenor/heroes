@@ -1,4 +1,4 @@
-import 'package:app/alert_model.dart';
+import 'package:app/providers/alert_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,12 +24,26 @@ class HeroesFab extends StatelessWidget {
 
     final imSafeAlertButton = FloatingActionButton(
       onPressed: alertModel.cancelAlert,
+      shape: StadiumBorder(),
       child: alertModel.loading
           ? spinner
-          : Icon(
-              Icons.verified_user,
-              size: 45,
-              color: Colors.white,
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 6),
+                  child: Icon(
+                    Icons.verified_user,
+                    size: 45,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  "I'm safe now",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
       backgroundColor: Colors.green,
     );
@@ -47,12 +61,13 @@ class HeroesFab extends StatelessWidget {
     );
 
     return SizedBox(
-        width: 80,
-        height: 80,
-        child: alertModel.alertState == AlertState.EMITTING_ALERT
-            ? imSafeAlertButton
-            : alertModel.alertState == AlertState.WATCHING_ALERT
-                ? stopWatchingAlertButton
-                : createAlertButton);
+      width: alertModel.alertState == AlertState.EMITTING_ALERT ? 170 : 80,
+      height: alertModel.alertState == AlertState.EMITTING_ALERT ? 60 : 80,
+      child: alertModel.alertState == AlertState.EMITTING_ALERT
+          ? imSafeAlertButton
+          : alertModel.alertState == AlertState.WATCHING_ALERT
+              ? stopWatchingAlertButton
+              : createAlertButton,
+    );
   }
 }
