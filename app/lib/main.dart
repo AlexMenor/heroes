@@ -143,7 +143,7 @@ class _MyAppState extends State<MyApp> {
               'This service runs to keep the app up to date with your location',
           notificationBigMsg:
               'Background location is on to keep the app up to date with your location. This is required to know if you are close to someone that needs help.',
-          notificationIcon: '',
+          notificationIcon: 'launcher_icon',
           notificationIconColor: Colors.grey,
           notificationTapCallback: LocationCallbackHandler.notificationCallback,
         ),
