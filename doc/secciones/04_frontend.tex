@@ -1,0 +1,89 @@
+\chapter{Frontend}
+\section{SDK}
+
+Para el proyecto considero imprescindible que el código en el cliente sea de la forma de una aplicación móvil. 
+Entrar a una web para el caso de uso lo descarto por dos motivos:
+\begin{enumerate}
+  \item Una app instalada es más accesible que entrar al navegador y después a una web.
+  \item La cantidad de APIs a las que podemos acceder desde una aplicación es mayor. Y para la iniciativa de "esponja de datos" necesito acceso a APIs muy concretas que no se pueden usar a traves del navegador.
+\end{enumerate}
+
+¿Qué características son deseables?
+
+\begin{enumerate}
+  \item Una base de código para iOS y Android.
+  \item Paradigma declarativo.
+  \item Capacidad para utilizar funcionalidades nativas y especificas del SO subyacente.
+\end{enumerate}
+
+Por la primera característica, tengo que descartar Android e IOS nativo. 
+
+Plataformas que cumplen: 
+\begin{itemize}
+  \item React Native
+  \item Nativescript
+  \item Ionic
+  \item Qasar
+  \item Flutter
+\end{itemize}
+
+
+Si bien es cierto que React Native tiene a favor la popularidad, un lenguaje al que ya estoy habituado y más estabilidad, es más lento que Flutter y hace una traducción de componentes a código nativo.
+Con Flutter sin embargo hay total control de los componentes y se muestran igual en las dos plataformas. Qasar e Ionic son muy parecidos a React Native con menos popularidad, más posibilidad de frameworks como Vue o Angular pero usando 
+una webview con acceso a APIs nativas via cordova. Nativescript por último es similar a React Native, también en el método, ya que accede directamente a APIs nativas.
+
+\section{Mapas}
+
+Hay dos componentes:
+ \begin{itemize}
+   \item Provider de mapas: Proporcionan los "tiles" que no son más que imágenes que forman el mapa. OpenStreetMap por ejemplo.
+   \item Controlador: Se encarga de cargar y mostrar los tiles en la pantalla, además de reaccionar a los gestos que hace el usuario para moverse por el mapa. 
+ \end{itemize}
+
+ Estoy utilizando \href{https://wiki.openstreetmap.org/wiki/Tiles}{openstreetmap como provider}. Y como controlador \href{https://pub.dev/packages/map}{este} porque es bastante maduro, customizable y compatible con cualquier provider.
+
+\section{Actualización de la localización}
+Una parte fundamental de la aplicación es tener al día la ubicación del usuario para que sea localizable en situación de alerta.
+
+En los siguientes escenarios:
+\begin{itemize}
+	\item La aplicación está en primer plano.
+	\item La aplicación está abierta en segundo plano.
+	\item La aplicación está cerrada.
+\end{itemize}
+
+Para ello, he usado un isolate, que se comunica con la aplicación por medio de un Port y envía la ubicación actual al servidor.
+Además, usa APIs de Android que sacan partido a varios sensores del dispositivo para disparar este 
+proceso solo cuando el usuario realmente está en movimiento.
+También ha sido necesario registrar plugins como FCM y dotenv en java, para que estén disponibles en el isolate.
+
+\section{Firebase Cloud Messaging}
+Como he comentado en la sección **REFERENCIAR**, necesitamos un mecanismo para enviar notificaciones push a los usuarios en iOS y Android.
+Además he integrar FCM en el servidor, también tenemos que hacerlo en el cliente para que las notificaciones lleguen en todos los escenarios.
+
+\begin{itemize}
+	\item La aplicación está en primer plano.
+	\item La aplicación está abierta en segundo plano.
+	\item La aplicación está cerrada.
+\end{itemize}
+
+
+Otra ventaja de usar FCM, es que nos permite obtener de manera sencilla un identificador único de dispositivo, que podemos usar en el servidor para enviar las notificaciones push.
+
+\section{Websockets}
+
+Para obtener actualizaciones respecto a una alerta una vez la estamos escuchando, utilizamos el endpoint **REFERENCIAR** mediante websockets.
+He usado web\_socket\_channel para esto.
+
+\section{Manejo del estado}
+En flutter, como en otros frameworks, se crea un árbol de componentes.
+Los datos fluyen de arriba a abajo, de padres que saben más a hijos que saben
+menos. Los hijos informan a los padres de cambios mediante callbacks.
+Sin embargo, hay veces que ciertos datos o comportamientos deben ser
+expuestos para muchos componentes. También puede pasar que no se necesiten
+en componentes superficiales y sean necesarios en otros muy profundos. \\
+En un ecosistema tan grande como el de flutter, tenemos varias propuestas, más y
+menos sofisticadas. Redux, BLoC/Rx o MobX son algunos ejemplos, adecuadas
+para casos más pesados.\\
+En mi opinión, para aplicaciones pequeñas/medianas Provider es un "sweet spot"
+entre no usar estado de aplicación y usar uno muy potente. 
