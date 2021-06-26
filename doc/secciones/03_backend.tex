@@ -6,26 +6,35 @@ He escogido usar Typescript. Es un lenguaje de tipado gradual que transpila a Ja
 Como ventajas sobre Javascript:
 \begin{itemize}
 	\item Mejor DX, sobre todo gracias al autocompletado.
-	\item Detección de errores precoz.
+	\item Detección de errores precoz gracias a los tipos.
 \end{itemize}
-Es cierto, sin embargo, que añade más complejidad en el setup de desarrollo (y también en el de despliegue) del que hablaré más adelante.
-Es más flexible que otros lenguajes tipados estrictos como Java o C\#.
+Es cierto, sin embargo, que añade más complejidad en el setup de desarrollo (y también en el de despliegue) del que hablo en la sección \ref{sec:dev}. \\
+Es más flexible que otros lenguajes tipados estrictos como Java o C\#. \\ \\
 Como runtime he elegido Node. Es single threaded con non blocking IO, lo cual se ajusta bien al tipo 
 de peticiones que se atienden en el backend (sin cómputos extensos).  \\
-Como alternativa, podría haber elegido Deno, pero tiene un ecosistema aún en crecimiento.
+Como alternativa, podría haber elegido Deno, pero no tiene un ecosistema aún tan desarrollado.
 
 \section{Framework}
 La API será REST, necesitamos un framework para implementar esta interfaz. \\
 
-He decido usar express. Es un framework muy establecido y unopinionated. Esto tiene importancia en la 
-arquitectura limpia que explico en la sección **REFERENCIAR**. 
+He decido usar express. Es un framework unopinionated muy consolidado. Esto tiene importancia en la 
+arquitectura limpia que explico en la sección \ref{sec:clean}. \\
+Otras alternativas que he considerado son: Koa, Fastify o Hapi.
 
-\section{Setup de desarrollo}
+\section{Setup de desarrollo}\label{sec:dev}
 
 Para tener un entorno de desarrollo replicable por cualquiera que esté interesado en trabajar en este proyecto, 
 he usado Docker y Docker Compose. He creado un Dockerfile que encapsula el microservicio. 
-Por último, en Docker Compose comunico el microservicio y los otros procesos (base de datos y pub/sub).
+Por último, en Docker Compose comunico el microservicio y los otros procesos (base de datos y pub/sub). \\ \\
+Las instrucciones para arrancar el microservicio son las siguientes:
 
+\begin{enumerate}
+	\item En el archivo .env.template están recogidas las variables de entorno que hacen falta para configurar este microservicio.
+Podemos simplemente copiar este archivo a otro de nombre .env y dotenv se encargará de usarlas (ver sección \ref{sec:config}).
+\item También necesitamos un archivo serviceAccountKey.json que se puede obtener en Firebase Cloud Messaging y que hay que situar en este directorio. 
+(En el .gitignore está declarado este archivo porque contiene claves privadas.)
+\item Una vez hecho esto, simplemente ejecutamos: docker-compose up
+\end{enumerate}
 
 \section{Base de datos}
 
@@ -46,61 +55,139 @@ Opto por tanto por MongoDB que \href{https://stackoverflow.com/questions/2573409
 
 Además, puedo habilitar la escritura en replicas para cambiar la consistencia por consistencia eventual y tener más disponibilidad. \href{https://stackoverflow.com/questions/11292215/where-does-mongodb-stand-in-the-cap-theorem}{Explicado aquí.}
 
-\section{Arquitectura limpia}
+\subsection{Configuración de MongoDB}
 
-He tratado de mantener en todo momento el dominio desacoplado de los detalles de implementación.
+En el archivo mongo-init.js creo el usuario que se va a utilizar desde el microservicio y el índice "2dsphere". 
+En el docker-compose lo monto como volumen para que lo pueda usar la instancia que se declara ahí.
+
+\section{Arquitectura limpia}\label{sec:clean}
+
+He tratado de mantener en todo momento el dominio desacoplado de los detalles de infraestructura, de la interfaz de usuario y de cualquier framework.
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.3]{clean_arc.png}
+	\end{figure}
 
 Tenemos tres capas bien diferenciadas:
 \subsection{Aplicación}
-En este caso es una API Rest implementada con express. Toma peticiones http, extrae la información, la valida, usa métodos expuestos del dominio y devuelve información.
-Aparte, también hay un endpoint websocket que explico en **REFERENCIAR**.
+En este caso es una API REST implementada con Express. Toma peticiones HTTP, extrae la información, la valida, usa métodos expuestos del dominio y devuelve información.
+Aparte, también hay un endpoint websocket que explico en la subsección \ref{subsec:websocket}. \\
+Considero importante separar bien esta capa del servicio que consume. Con esto, sería sencillo dejar de usar 
+REST para utilizar SOAP o GraphQL, por ejemplo.
 \subsection{Dominio}
-Tipos y procesos que exclusivamente representan el dominio.
-Cuando se necesita ''materializar'' algo, se declaran interfaces. Por ejemplo, interfaz Persistencia.
+Tipos y casos de uso que pertenecen exclusivamente al dominio.
+Cuando estos casos de uso necesitan utilizar un servicio de infraestructura como el de persistencia, por ejemplo,
+se depende exclusivamente de una interfaz con esa función y se inyecta en tiempo de ejecución un servicio que la implemente.
+**INSERTAR DIAGRAMA** \\
+
+Asimismo, esta separación incrementa mucho la testeabilidad del microservicio. Podemos usar mocks para implementar
+las interfaces de infraestructura y probar todas las posibles respuestas de estos servicios. \\
+Por último, he comentado las intefaces concienzuadamente con js-doc las interfaces para facilitar la implementación de otros servicios.
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.9]{jsdoc.png}
+	\end{figure}
+
 \subsection{Infraestructura} 
 Son servicios que implementan las interfaces de las que acabo de hablar.
-En este capa está la lógica para conectarse a los distintos servicios: Bases de datos, mensajería, etc...
+En este capa está la lógica para comunicarse con los distintos servicios: Bases de datos, mensajería, etc...
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.6]{imp.png}
+	\end{figure}
+
 
 \section{Operaciones}
 
 Descripción en líneas generales de los tipos de peticiones que debe atender el backend:
 
-\subsection{Crear/Actualizar ubicación}
+\subsection{Crear/Actualizar ubicación}\label{op:ubi}
 Toma unas coordenadas y un id de usuario y persiste en la base de datos.
 Esta operación es indispensble para avisar a los usuarios cercanos a una emergencia y para 
-actualizarles sobre la posición de una víctima.
+actualizarles sobre la posición de una víctima (publicando la ubicación actualizada en el pub/sub, sección \ref{sec:pubsub}).
 
 \subsection{Crear alerta}
 Verificando antes que el usuario no tiene ya otra alerta en curso, la persiste.
-Busca todos los usuarios cercanos que hayan actualizado su ubicación recientemente y les avisa.
-Mientras sigua en estado activo, se verifica que el usuario sigue actualizando su ubicación, de lo contrario la alerta pasa a estado inactivo.
+Busca todos los usuarios cercanos que hayan actualizado su ubicación recientemente y les avisa. Para hacer
+esta consulta rápidamente, la operación \ref{op:ubi} indexa las ubicaciones.
+Mientras siga en estado activo, se verifica que el usuario sigue actualizando su ubicación, de lo contrario la alerta pasa a estado inactivo.
 
-\subsection{Escuchar alerta}
+\subsection{Escuchar alerta}\label{subsec:websocket}
 Los usuarios a los que se ha avisado de la alerta pueden empezar a escuchar actualizaciones de la alerta,
-ya sea porque el usuario que la creó cambia su posición o porque la alerta es ya inactiva.
+ya sea porque el usuario que la creó cambia su posición o porque la alerta es ya inactiva. \\
+Para esto:
+\begin{enumerate}
+	\item El cliente y el servidor mantienen un websocket abierto.
+	\item Se subscribe a los cambios en la alerta o en la ubicación.
+	\item Cuando estos cambios se producen, se emiten por el websocket al cliente.
+	\item Si la alerta pasa a estado inactivo, el websocket se cierra y se desubscribe.
+\end{enumerate}
 
 \subsection{Borrar alerta}
 Se marca una alerta existente como inactiva. Si hay usuarios pendientes de esta alerta, se les avisa.
 
 
-\section{Pub/Sub}
+\section{Pub/Sub}\label{sec:pubsub}
 Al añadir websockets, teniendo en cuenta que queremos tener escalado horizontal en este servicio,
 necesitamos un sistema de publicación/subscripción. \\
-Para ello, he elegido REDIS, que cuenta con una interfaz muy simple. 
+Para ello, he elegido Redis, que cuenta con una interfaz muy simple. Como librería, ioredis, 
+que es muy robusta y rápida.
+
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.4]{pubsub.png}
+	\end{figure}
+
+\subsection{Publisher}
+
+Este servicio simplemente se conecta a Redis y publica entidades (ubicaciones y alertas).
+Publica al canal definido con la id de la entidad, esta misma serializada.
+
+\subsection{Subscriber}
+Este servicio es algo más sofisticado. Mantiene en un Map los canales a los que está subscrito, 
+junto a todas las subscripciones que hay para ese canal. Estas mismas tienen un id para manejar la desubscripción y 
+el callback que hay que ejecutar cuando llega una publicación para esa subscripción. 
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.8]{map.png}
+	\end{figure}
 
 \section{Envío de notificaciones}
 Para avisar a las personas cercanas de que alguien necesita ayuda, tenemos que tener la habilidad de enviar
-notificaciones push. Para esto he usado Firebase Cloud Messaging, en la sección **REFERENCIAR** desarrollo más 
-esta parte, porque tiene que ver mucho con la parte del cliente.
+notificaciones push. Para esto he usado Firebase Cloud Messaging, del que hablo más en la sección \ref{sec:fib}.
 
-\section{Tests}
+\section{Tests}\label{sec:tests}
 En este microservicio uso Jest y Supertest para testear las capas de aplicación y dominio, con mocks de la capa de infraestructura.
-La arquitctura limpia facilita mucho esta tarea con inyección de dependencias.
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.5]{test.png}
+	\end{figure}
 
-\section{Configuración}
+\section{Configuración}\label{sec:config}
 Las variables de configuración se definen mediante variables de entorno. Para desarrollo uso dotenv, 
 que las carga de un archivo de configuración.
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.5]{env.png}
+	\end{figure}
 
-\section{Otras herramientas}
-He utilizado express-validator para validar los cuerpos de las peticiones HTTP, eslint y prettier para 
-el lint y el formato del código y nodemon para reiniciar el microservicio cada vez que hay cambios en desarrollo.
+	Por otro lado, los parámetros de configuración que tengan que ver con la lógica
+	de negocio, los he declarado y documentado en el servicio de dominio.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.6]{conf.png}
+	\end{figure}
+
+
+
+\section{Otras herramientas}\label{sec:tools}
+Otras herramientas que he utilizado en esta parte son:
+\begin{itemize}
+	\item Express-validator para validar los cuerpos de las peticiones HTTP
+	\item ESLint para mantener las buenas prácticas.
+	\item Prettier para el formateo del código.
+	\item Nodemon para reiniciar el microservicio cada vez que hay cambios durante el desarrollo.
+	\item Concurrently para ejecutar con un solo comando (npm run dev) el watcher de Typescript y Nodemon.
+\end{itemize}

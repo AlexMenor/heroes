@@ -13,7 +13,7 @@ Los últimos estudios, como el de RACC y Zurich \cite{racc-zurich}, sacan conclu
 \end{itemize}
 
 \section{Estado del arte}\label{sec:art}
-Durante los últimos años, han sido emergiendo distintas aplicaciones que tratan de paliar esta inseguridad que podemos clasificar en dos grupos:
+Durante los últimos años, han ido emergiendo distintas aplicaciones que tratan de paliar esta inseguridad que podemos clasificar en dos grupos:
 \begin{enumerate}
 \item \textbf{Botón del pánico a la policía:} En caso de estar en una situación complicada, podemos avisar a la policía sin necesidad de llamar. La más famosa es \textbf{AlertCops} que cuenta con el respaldo del ministerio del interior.
 \item \textbf{Botón del pánico a un grupo de contactos:} Con una activación similar a el grupo anterior, el aviso esta vez se hace a una serie de personas cercanas. En muchos casos, estas serán capaces de saber donde estás, escuchar y ver lo que pasa a partir de ese momento. Algún ejemplo: \textbf{bSafe}, \textbf{When and Where} o \textbf{Companion}.
@@ -29,7 +29,6 @@ Pese a la cantidad de alternativas y a la alta calidad de muchas de ellas, no ha
 
 \section{Análisis del problema}
 Queremos reducir al máximo la inseguridad de todas las personas en la vía pública.
-Las propuestas que hemos estudiado hasta el momento se concentran en la pedida de auxilio.
 
 Podemos identificar tres niveles dentro del problema:
 \begin{enumerate}
@@ -38,10 +37,10 @@ Podemos identificar tres niveles dentro del problema:
   \item \textbf{Pánico:} Es necesaria una ayuda inmediata y sería pertinente avisar a los cuerpos de seguridad.
 \end{enumerate}
 
-Para los dos primeros, que a su vez son las mas comunes, no hay propuestas.
+Para los dos primeros, que a su vez son las más comunes, no hay propuestas.
 
-\section{Objetivos generales}
-\begin{itemize}
+\section{Objetivos generales}\label{sec:obj}
+\begin{enumerate}
   \item La solución tiene que cubrir la funcionalidad de los botones del pánico existentes, analizados en la sección \ref{sec:art}.
   Dar la posibilidad de: 
   \begin{itemize}
@@ -49,10 +48,12 @@ Para los dos primeros, que a su vez son las mas comunes, no hay propuestas.
     \item Avisar a un grupo de contactos de confianza con un botón, compartiendo ubicación, audio y video.
   \end{itemize}
   Configurable por el usuario.
+  \item Deberá recoger toda la información relevante del entorno que pueda servir para esclarecer los hechos.
   \item La solución tiene que ser efectiva para los primeros niveles de inseguridad descritos anteriormente.
   \begin{itemize}
     \item Dar la posibilidad de que alguien que esté cerca te acompañe si lo necesitas.
     \item Dar la posiblidad de prestar esa ayuda.
   \end{itemize}
-  \item Además, deberá recoger toda la información relevante del entorno que pueda servir para esclarecer los hechos.
-\end{itemize}
+En este trabajo, vamos a plantear y a implementar una solución para este objetivo.
+\end{enumerate}
+
