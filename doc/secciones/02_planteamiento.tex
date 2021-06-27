@@ -8,24 +8,24 @@ Necesito una metodología que ponga al usuario en el centro y permita una retroa
 Aplicando técnicas de design thinking, se ha hecho un análisis de "Personas". **INCLUIR ANEXO**
 \\
 Lo ideal, es que estos conceptos que expongo más abajo tengan su representación en el sistema que utilicemos
-para ordenar estas tareas, en mi caso, GitHub. \\ \\
-Por otra parte, es importante que los commits referencien a estas tareas. De esta forma, podemos
-saber no solo quién ha escrito una línea de código sino también por qué está ahí. Es una forma de documentación de código.
+para administrar estas tareas, en mi caso, GitHub. \\ \\
+Por otra parte, es importante que \textbf{los commits referencien a estas tareas.} De esta forma, podemos
+saber no solo quién ha escrito una línea de código sino también \textbf{por qué está ahí.} Es una forma de documentar el código.
 \begin{figure}[H]
 \centering	
 \includegraphics[scale=0.6]{git.png}
 \end{figure}
 \subsection{Iniciativas}
-Son grandes grupos de funcionalidad, independientes entre sí, que sirven para atacar el problema.
+\textbf{Son grandes grupos de funcionalidad, independientes entre sí, que sirven para atacar el problema.}
 Acorde a lo explicado en la sección \ref{sec:obj}, he propuesto las tres iniciativas y las he 
-reflejado como proyectos dentro de un repositorio en GitHub.
+reflejado como proyectos dentro de el repositorio de GitHub.
 \begin{figure}[H]
 \centering	
 \includegraphics[scale=0.4]{iniciativas.png}
 \end{figure}
 
 \subsection{Épica}
-Una iniciativa está formada por varias épicas. Una épica por si sola no es una solución al problema, pero todas las épicas de una iniciativa contribuyen a la solución.
+Una iniciativa está formada por varias épicas. \textbf{Una épica por si sola no es una solución al problema}, pero todas las épicas de una iniciativa contribuyen a la solución.
 Por ejemplo, para la iniciativa el sistema de auxilio, que es en la que se centra este trabajo, tenemos 
 como épicas el frontend y el backend. Se reflejan en GitHub como milestones.
 \begin{figure}[H]
@@ -35,10 +35,9 @@ como épicas el frontend y el backend. Se reflejan en GitHub como milestones.
 
 
 \subsection{Historia de usuario}
-Una épica a su vez está formada por varias historias de usuario que definen una funcionalidad que el usuario espera en una solución, de la forma: Como [rol] quiero [funcionalidad] para [razón].
+Una épica a su vez está formada por varias historias de usuario que definen \textbf{una funcionalidad que el usuario espera en una solución}, de la forma:\\ \textit{Como [rol] quiero [funcionalidad] para [razón].}\\
 
 A la hora de implementar una historia de usuario, esta se puede definir con requisitos más detallados.
-Por ejemplo, esta historia de usuario forma parte de la aplicación móvil.
 
 \begin{figure}[H]
 	\centering	
@@ -63,11 +62,12 @@ Cuando no se obtiene el comportamiento esperado, podemos abrir un issue que se c
 
 \section{Quality assurance}
 
-Para asegurar la calidad del proyecto necesitamos utilizar integración continua con tests y análisis estático del código por medio de linters (ver sección \ref{sec:tools}).
+Para asegurar la calidad del proyecto necesitamos utilizar \textbf{integración continua con tests y análisis estático del código} por medio de linters (ver sección \ref{sec:tools}).
+
 
 Cada vez que se hace un commit, se ejecutan todos estos procesos automáticamente.
 
-La presencia de tests, de la que hablo con más detalle en la sección \ref{sec:tests}, nos permite refactorizar con más 
+La presencia de tests, de la que hablo con más detalle en la sección \ref{sec:tests}, nos permite, entre otras cosas, refactorizar con más 
 tranquilidad. \\
 
 Para cubrir la parte de integración continua he utilizado Github Actions,  configurando en formato yaml todos los flujos.\\
@@ -80,10 +80,14 @@ son distintos para cada entorno.
 
 \section{Planteamiento de implementación}
 
-Tenemos dos partes bien diferenciadas. La parte del cliente, que se encargaría de actualizar con cierta frecuencia
+Tenemos dos partes bien diferenciadas.
+\begin{itemize}
+	\item  \textbf{La parte del cliente,} que se encargaría de actualizar con cierta frecuencia
 la ubicación de cada usuario, recibir un aviso cuando haya alguien cercano que necesite ayuda y permitir realizar el seguimiento de una alerta.
-
-Por otro lado, la parte del servidor recibe tanto las actualizaciones en cuanto a ubicación como 
-los avisos de alerta. Se encarga por tanto de hacer los cálculos para saber a quién avisar y hacerlo. 
+\item Por otro lado, \textbf{la parte del servidor} recibe tanto las actualizaciones en cuanto a ubicación como 
+los avisos de alerta. Se encarga por tanto de hacer los cálculos para saber a quién avisar y hacerlo. \\
 Una vez la víctima y la persona que se presta a ayudar están conectadas, el servidor debe mantener
 al cliente informado sobre la localización de la víctima.
+\end{itemize}
+
+

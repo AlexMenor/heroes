@@ -1,68 +1,75 @@
 \chapter{Backend}
 
-En esta sección voy a hablar de la implementación del microservicio de geolocalización.
+En esta sección voy a hablar de \textbf{la implementación del microservicio de geolocalización}, el backend del sistema de auxilio.
 \section{Lenguaje de programación}
-He escogido usar Typescript. Es un lenguaje de tipado gradual que transpila a Javascript.
+He decidido usar \textbf{Typescript.} Es un lenguaje de tipado gradual que transpila a Javascript.
 Como ventajas sobre Javascript:
 \begin{itemize}
-	\item Mejor DX, sobre todo gracias al autocompletado.
-	\item Detección de errores precoz gracias a los tipos.
+	\item Mejor \textit{developer experience}, sobre todo gracias al autocompletado.
+	\item \textbf{Detección de errores precoz gracias a los tipos.}
 \end{itemize}
-Es cierto, sin embargo, que añade más complejidad en el setup de desarrollo (y también en el de despliegue) del que hablo en la sección \ref{sec:dev}. \\
-Es más flexible que otros lenguajes tipados estrictos como Java o C\#. \\ \\
-Como runtime he elegido Node. Es single threaded con non blocking IO, lo cual se ajusta bien al tipo 
-de peticiones que se atienden en el backend (sin cómputos extensos).  \\
+Es cierto, sin embargo, que añade más complejidad en el setup de desarrollo (y también en el de despliegue) del que hablo en la sección \ref{sec:dev}. \\ \\
+\textbf{Considero que es un \textit{sweet spot} entre la excesiva libertad en Javascript y la rigidez de lenguajes tipados estrictos como Java o C\#.} \\ \\
+
+\textbf{Como runtime he elegido Node.} Utiliza una sola hebra con E/S no bloqeuante, lo cual se ajusta bien al tipo 
+de peticiones que se atienden en este backend (sin cómputos extensos).  \\ \\
 Como alternativa, podría haber elegido Deno, pero no tiene un ecosistema aún tan desarrollado.
 
 \section{Framework}
-La API será REST, necesitamos un framework para implementar esta interfaz. \\
+\textbf{La API será, por simplicidad, REST.} Necesitamos un framework para implementar esta interfaz. \\
 
-He decido usar express. Es un framework unopinionated muy consolidado. Esto tiene importancia en la 
+\textbf{He decido usar Express. Es un framework \textit{unopinionated} muy consolidado.} Esto tiene importancia en la 
 arquitectura limpia que explico en la sección \ref{sec:clean}. \\
 Otras alternativas que he considerado son: Koa, Fastify o Hapi.
 
 \section{Setup de desarrollo}\label{sec:dev}
 
-Para tener un entorno de desarrollo replicable por cualquiera que esté interesado en trabajar en este proyecto, 
-he usado Docker y Docker Compose. He creado un Dockerfile que encapsula el microservicio. 
-Por último, en Docker Compose comunico el microservicio y los otros procesos (base de datos y pub/sub). \\ \\
-Las instrucciones para arrancar el microservicio son las siguientes:
+He invertido tiempo para tener \textbf{un entorno de desarrollo replicable por cualquiera que esté interesado en trabajar en este proyecto.}
+Por eso, he usado Docker y Docker Compose. He creado un \textit{Dockerfile} que encapsula el microservicio. 
+\\ Por último, en Docker Compose arranco y comunico el microservicio y los otros procesos (base de datos y pub/sub). \\ \\
+\textbf{Las instrucciones para iniciar un entorno de desarrollo son las siguientes:}
 
 \begin{enumerate}
-	\item En el archivo .env.template están recogidas las variables de entorno que hacen falta para configurar este microservicio.
-Podemos simplemente copiar este archivo a otro de nombre .env y dotenv se encargará de usarlas (ver sección \ref{sec:config}).
-\item También necesitamos un archivo serviceAccountKey.json que se puede obtener en Firebase Cloud Messaging y que hay que situar en este directorio. 
+	\item En el archivo \textit{.env.template} están recogidas las variables de entorno que hacen falta para configurar este microservicio.
+Podemos simplemente copiar este archivo a otro de nombre \textit{.env} y \textit{dotenv} se encargará de usarlas (ver sección \ref{sec:config}).
+\item También necesitamos un archivo \textit{serviceAccountKey.json} que se puede obtener en Firebase Cloud Messaging y que hay que situar en este directorio. 
 (En el .gitignore está declarado este archivo porque contiene claves privadas.)
-\item Una vez hecho esto, simplemente ejecutamos: docker-compose up
+\item Una vez hecho esto, simplemente ejecutamos: \textbf{\textit{docker-compose up}}.
 \end{enumerate}
 
 \section{Base de datos}
 
-Necesito una base de datos que soporte un gran volumen de operaciones y permita consultas basadas en localizaciones geográficas. Es decir, en el CAP Theorem necesito la A y la P.
+Necesito una base de datos que \textbf{soporte un gran volumen de operaciones y permita consultas basadas en localizaciones geográficas.} \\ \\
+\textbf{En el CAP Theorem necesito la A (de availability) y la P (de partition tolerance), sacrificando la consistencia.}
+\\
 En esta base de datos se almacenará de manera periódica la ubicación de cada uno de los usuarios con el fin de una consulta posterior, que nos permita saber qué usuarios
 están cerca de una persona que necesita ayuda. Por ello, es más que suficiente la consistencia eventual.
 
 \subsection{Opciones}
 
-MongoDB tiene buen soporte para geo-queries, de hecho vienen ya instaladas, pero mongo prioriza la consistencia antes que la disponibilidad. Postgres, con PostGIS, también soporta bien
-este tipo de consultas, pero prioriza la consistencia a la tolerancia a la partición. \\
-CouchDB, Dynamo y Cassandra son sistemas con alta disponibilidad y tolerancia a la partición. CouchDB es la mejor opción porque Dynamo es privativa y Cassandra es más adecuada para aplicaciones con más
+\begin{itemize}
+	\item \textbf{MongoDB tiene buen soporte para \textit{geo-queries}}, de hecho vienen ya instaladas, sin embargo, \textbf{prioriza la consistencia antes que la disponibilidad.}
+\item \textbf{PostgreSQL}, con PostGIS, \textbf{también soporta bien este tipo de consultas, pero prioriza la consistencia a la tolerancia a la partición.} 
+\item \textbf{CouchDB, Dynamo y Cassandra son sistemas con alta disponibilidad y tolerancia a la partición.} CouchDB es la mejor opción porque Dynamo es privativa y Cassandra es más adecuada para aplicaciones con más
 escrituras que actualizaciones. 
+\end{itemize}
 
-Tras usar couchDB me di cuenta de que el soporte para queries de geolocalización \href{https://docs.couchdb.org/en/stable/ddocs/search.html?highlight=geospatial#geographical-searches}{no es bueno}.
 
-Opto por tanto por MongoDB que \href{https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb}{sí tiene buen soporte}.
 
-Además, puedo habilitar la escritura en replicas para cambiar la consistencia por consistencia eventual y tener más disponibilidad. \href{https://stackoverflow.com/questions/11292215/where-does-mongodb-stand-in-the-cap-theorem}{Explicado aquí.}
+Tras usar CouchDB me di cuenta de que \textbf{el soporte para queries de geolocalización} \href{https://docs.couchdb.org/en/stable/ddocs/search.html?highlight=geospatial#geographical-searches}{no es bueno}.
+
+\textbf{Acabe optando por MongoDB} que \href{https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb}{sí tiene buen soporte}.
+
+Además, puedo habilitar la escritura en replicas para cambiar la consistencia estricta por consistencia eventual y tener más disponibilidad. \href{https://stackoverflow.com/questions/11292215/where-does-mongodb-stand-in-the-cap-theorem}{Explicado aquí.}
 
 \subsection{Configuración de MongoDB}
 
-En el archivo mongo-init.js creo el usuario que se va a utilizar desde el microservicio y el índice "2dsphere". 
-En el docker-compose lo monto como volumen para que lo pueda usar la instancia que se declara ahí.
+En el archivo \textit{mongo-init.js} creo el usuario que se va a utilizar desde el microservicio y el índice "2dsphere". 
+En Docker Compose lo monto como volumen para que lo pueda usar la instancia que se declara ahí.
 
 \section{Arquitectura limpia}\label{sec:clean}
 
-He tratado de mantener en todo momento el dominio desacoplado de los detalles de infraestructura, de la interfaz de usuario y de cualquier framework.
+He tratado de mantener en todo momento \textbf{el dominio desacoplado de los detalles de infraestructura, de la interfaz de usuario y de cualquier framework.}
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.3]{clean_arc.png}
@@ -70,19 +77,25 @@ He tratado de mantener en todo momento el dominio desacoplado de los detalles de
 
 Tenemos tres capas bien diferenciadas:
 \subsection{Aplicación}
-En este caso es una API REST implementada con Express. Toma peticiones HTTP, extrae la información, la valida, usa métodos expuestos del dominio y devuelve información.
+En este caso es una \textbf{API REST implementada con Express.} Toma peticiones HTTP, extrae la información, la valida, usa métodos expuestos del dominio y devuelve información.
 Aparte, también hay un endpoint websocket que explico en la subsección \ref{subsec:websocket}. \\
 Considero importante separar bien esta capa del servicio que consume. Con esto, sería sencillo dejar de usar 
-REST para utilizar SOAP o GraphQL, por ejemplo.
-\subsection{Dominio}
-Tipos y casos de uso que pertenecen exclusivamente al dominio.
-Cuando estos casos de uso necesitan utilizar un servicio de infraestructura como el de persistencia, por ejemplo,
-se depende exclusivamente de una interfaz con esa función y se inyecta en tiempo de ejecución un servicio que la implemente.
-**INSERTAR DIAGRAMA** \\
+REST para utilizar \textit{SOAP} o \textit{GraphQL}, por ejemplo.
 
-Asimismo, esta separación incrementa mucho la testeabilidad del microservicio. Podemos usar mocks para implementar
-las interfaces de infraestructura y probar todas las posibles respuestas de estos servicios. \\
-Por último, he comentado las intefaces concienzuadamente con js-doc las interfaces para facilitar la implementación de otros servicios.
+\subsection{Dominio}
+\textbf{Tipos y casos de uso que pertenecen exclusivamente al dominio.}
+Cuando estos casos de uso necesitan utilizar un servicio de infraestructura como el de persistencia, por ejemplo,
+\textbf{se depende exclusivamente de una interfaz que describe esa función y se inyecta en tiempo de ejecución un servicio que la implemente (inyección de dependencias).}
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.7]{di.png}
+	\caption{Inyeccion de dependencias}
+	\end{figure}
+
+Asimismo, \textbf{esta separación incrementa mucho la testeabilidad del microservicio,} porque las únicas dependencias
+que puede tener esta capa forman parte del lenguaje de programación. Podemos usar \textit{mocks} para implementar
+las interfaces de infraestructura y probar todas las posibles respuestas de estos servicios. \\ \\
+Por último, he comentado concienzuadamente las interfaces con \textbf{js-doc} para facilitar la implementación de otros servicios.
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.9]{jsdoc.png}
@@ -122,58 +135,63 @@ Para esto:
 	\item Cuando estos cambios se producen, se emiten por el websocket al cliente.
 	\item Si la alerta pasa a estado inactivo, el websocket se cierra y se desubscribe.
 \end{enumerate}
+\textbf{Utilizo websockets porque permite al servidor hacer "push" de información sin que el cliente tenga que hacer "polling".}
+He considerado que podría utilizar otros protocolos como SSE (server sent events) y una implementación más peer to peer con WebRTC por ejemplo, conectando directamente los dispositivos interesados.
+
+Es cierto que quitaría carga al servidor, pero también aumentaria la complejidad.
 
 \subsection{Borrar alerta}
 Se marca una alerta existente como inactiva. Si hay usuarios pendientes de esta alerta, se les avisa.
 
 
 \section{Pub/Sub}\label{sec:pubsub}
-Al añadir websockets, teniendo en cuenta que queremos tener escalado horizontal en este servicio,
-necesitamos un sistema de publicación/subscripción. \\
-Para ello, he elegido Redis, que cuenta con una interfaz muy simple. Como librería, ioredis, 
-que es muy robusta y rápida.
-
+\textbf{Al añadir websockets}, teniendo en cuenta que queremos tener escalado horizontal en este servicio,
+\textbf{necesitamos un sistema de publicación/subscripción.} \\
+Para ello, \textbf{he elegido Redis}, que cuenta con una interfaz muy simple. Como librería, ioredis, 
+que es muy robusta y rápida.\\
 
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.4]{pubsub.png}
 	\end{figure}
 
+\textbf{Por cada instancia del microservicio, tenemos dos conexiones a Redis:}
 \subsection{Publisher}
 
-Este servicio simplemente se conecta a Redis y publica entidades (ubicaciones y alertas).
-Publica al canal definido con la id de la entidad, esta misma serializada.
+Este servicio simplemente se conecta a Redis y \textbf{publica entidades en el momento en el que se modifican} (ubicaciones y alertas).
+Publica al canal definido con el id de la entidad, esta misma serializada.
 
 \subsection{Subscriber}
-Este servicio es algo más sofisticado. Mantiene en un Map los canales a los que está subscrito, 
-junto a todas las subscripciones que hay para ese canal. Estas mismas tienen un id para manejar la desubscripción y 
+Este servicio es algo más sofisticado. \textbf{Mantiene en un Map los canales a los que está subscrito y 
+para cada canal todas las subscripciones.} Estas mismas tienen un id para manejar la desubscripción (generado en tiempo de creación) y 
 el callback que hay que ejecutar cuando llega una publicación para esa subscripción. 
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.8]{map.png}
 	\end{figure}
-
+Cuando un websocket se cierra, las subscripciones asociadas desaparecen de esta estructura.
 \section{Envío de notificaciones}
-Para avisar a las personas cercanas de que alguien necesita ayuda, tenemos que tener la habilidad de enviar
-notificaciones push. Para esto he usado Firebase Cloud Messaging, del que hablo más en la sección \ref{sec:fib}.
+\textbf{Para avisar a las personas cercanas de que alguien necesita ayuda, tenemos que tener la habilidad de enviar
+notificaciones push.} Para esto he usado Firebase Cloud Messaging, del que hablo más en la sección \ref{sec:fib}.
 
 \section{Tests}\label{sec:tests}
-En este microservicio uso Jest y Supertest para testear las capas de aplicación y dominio, con mocks de la capa de infraestructura.
+En este microservicio uso Jest y Supertest para \textbf{testear las capas de aplicación y dominio, con mocks de la capa de infraestructura.} \\ \\
+Como próximos pasos, deberíamos implementar tests unitarios para la capa de dominio y especialmente la de infraestructura.
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.5]{test.png}
 	\end{figure}
 
 \section{Configuración}\label{sec:config}
-Las variables de configuración se definen mediante variables de entorno. Para desarrollo uso dotenv, 
+\textbf{Las variables de configuración se definen mediante variables de entorno.} Para desarrollo uso \textit{dotenv}, 
 que las carga de un archivo de configuración.
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.5]{env.png}
 	\end{figure}
 
-	Por otro lado, los parámetros de configuración que tengan que ver con la lógica
-	de negocio, los he declarado y documentado en el servicio de dominio.
+	Por otro lado, \textbf{los parámetros de configuración que tengan que ver con la lógica
+	de negocio, los he declarado y documentado en el servicio de dominio.}
 
 \begin{figure}[H]
 	\centering	
@@ -185,9 +203,9 @@ que las carga de un archivo de configuración.
 \section{Otras herramientas}\label{sec:tools}
 Otras herramientas que he utilizado en esta parte son:
 \begin{itemize}
-	\item Express-validator para validar los cuerpos de las peticiones HTTP
-	\item ESLint para mantener las buenas prácticas.
-	\item Prettier para el formateo del código.
-	\item Nodemon para reiniciar el microservicio cada vez que hay cambios durante el desarrollo.
-	\item Concurrently para ejecutar con un solo comando (npm run dev) el watcher de Typescript y Nodemon.
+	\item \textbf{Express-validator} para validar los cuerpos de las peticiones HTTP
+	\item \textbf{ESLint} para mantener las buenas prácticas.
+	\item \textbf{Prettier} para el formateo del código.
+	\item \textbf{Nodemon} para reiniciar el microservicio cada vez que hay cambios durante el desarrollo.
+	\item \textbf{Concurrently} para ejecutar con un solo comando (npm run dev) el watcher de Typescript y Nodemon.
 \end{itemize}
