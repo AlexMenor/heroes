@@ -168,9 +168,10 @@ el callback que hay que ejecutar cuando llega una publicación para esa subscrip
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.8]{map.png}
+	\caption{Estructura de datos en Subscriber}
 	\end{figure}
 Cuando un websocket se cierra, las subscripciones asociadas desaparecen de esta estructura.
-\section{Envío de notificaciones}
+\section{Envío de notificaciones}\label{sec:fibpre}
 \textbf{Para avisar a las personas cercanas de que alguien necesita ayuda, tenemos que tener la habilidad de enviar
 notificaciones push.} Para esto he usado Firebase Cloud Messaging, del que hablo más en la sección \ref{sec:fib}.
 
@@ -207,5 +208,5 @@ Otras herramientas que he utilizado en esta parte son:
 	\item \textbf{ESLint} para mantener las buenas prácticas.
 	\item \textbf{Prettier} para el formateo del código.
 	\item \textbf{Nodemon} para reiniciar el microservicio cada vez que hay cambios durante el desarrollo.
-	\item \textbf{Concurrently} para ejecutar con un solo comando (npm run dev) el watcher de Typescript y Nodemon.
+	\item \textbf{Concurrently} para ejecutar con un solo comando (\textit{npm run dev}) el watcher de Typescript y Nodemon.
 \end{itemize}

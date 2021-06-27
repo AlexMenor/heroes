@@ -1,24 +1,30 @@
 \chapter{Frontend}
-\section{SDK}
-
-Para el proyecto considero imprescindible que el código en el cliente sea de la forma de una aplicación móvil. 
-Entrar a una web para el caso de uso lo descarto por dos motivos:
+La segunda parte del sistema de auxilio es el cliente, \textbf{el código que se ejecuta en el dispositvo del usuario.}
+\section{Elección de la tecnología}
+Nunca hemos tenido más opciones en este sentido:
+\subsection{Web vs aplicación móvil}
+Para el proyecto considero imprescindible que el cliente sea de la forma de \textbf{una aplicación móvil.} 
+Una web app para este caso de uso la descarto por los siguientes motivos:
 \begin{enumerate}
-  \item Una app instalada es más accesible que entrar al navegador y después a una web.
-  \item La cantidad de APIs a las que podemos acceder desde una aplicación es mayor. Y para la iniciativa de "esponja de datos" necesito acceso a APIs muy concretas que no se pueden usar a traves del navegador.
+  \item Una app instalada es \textbf{más accesible} que entrar al navegador y después a una web.
+  \item La cantidad de APIs a las que podemos acceder desde una aplicación es mayor. \textbf{Y necesito acceso a APIs muy concretas que no se pueden usar a traves del navegador.}
+	\item \textbf{Ejecutar procedimientos en segundo plano en una web app cuando está cerrada no es posible.}
+	\item \textbf{Recibir notificaciones push en iOS no es posible por medio de una web app.}
 \end{enumerate}
 
-¿Qué características son deseables?
+\subsection{Framework de aplicación móvil}
+
+\textbf{¿Qué características son deseables?}
 
 \begin{enumerate}
-  \item Una base de código para iOS y Android.
-  \item Paradigma declarativo.
-  \item Capacidad para utilizar funcionalidades nativas y especificas del SO subyacente.
+  \item \textbf{Una base de código} para iOS y Android.
+  \item \textbf{Paradigma declarativo}, que es más mantenible y claro que el imperativo.
+  \item \textbf{Capacidad para utilizar funcionalidades nativas}, especificas del sistema operativo subyacente.
 \end{enumerate}
 
-Por la primera característica, tengo que descartar Android e IOS nativo. 
+\textbf{Por la primera característica, tengo que descartar Android e IOS nativo.} \\
 
-Plataformas que cumplen: 
+\textbf{Plataformas que la cumplen: }
 \begin{itemize}
   \item React Native
   \item Nativescript
@@ -27,44 +33,58 @@ Plataformas que cumplen:
   \item Flutter
 \end{itemize}
 
+\textbf{Flutter vs React native}: Si bien es cierto que React Native tiene a favor la popularidad, un lenguaje al que ya estoy habituado y más estabilidad, es más lento que Flutter y hace una traducción de componentes a código nativo.
+\textbf{Con Flutter sin embargo hay total control de los componentes y se muestran igual en las dos plataformas.} \\ \\
 
-Si bien es cierto que React Native tiene a favor la popularidad, un lenguaje al que ya estoy habituado y más estabilidad, es más lento que Flutter y hace una traducción de componentes a código nativo.
-Con Flutter sin embargo hay total control de los componentes y se muestran igual en las dos plataformas. Qasar e Ionic son muy parecidos a React Native con menos popularidad, más posibilidad de frameworks como Vue o Angular pero usando 
-una webview con acceso a APIs nativas via cordova. Nativescript por último es similar a React Native, también en el método, ya que accede directamente a APIs nativas.
+\textbf{Qasar e Ionic vs React native}: Qasar e Ionic son muy parecidos a React Native con menos popularidad, más posibilidad de frameworks como Vue o Angular pero usando 
+una webview con acceso a APIs nativas via cordova. \\ \\
 
-\section{Mapas}
+\textbf{Nativescript vs React Native:} Nativescript por último es similar a React Native, también en el método, ya que accede directamente a APIs nativas. \\ \\
 
-Hay dos componentes:
+\subsection{Lenguaje en la aplicación móvil}
+\textbf{Flutter usa Dart}, que es un lenguaje tipado que recuerda a Typescript: también con una hebra única y E/S no bloqueante.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.6]{dart.png}
+	\caption{Funcionamiento del runtime de Dart}
+	\end{figure}
+
+\section{Mapa}
+En la aplicación, el mapa es muy protagonista. En él se ve representado el usuario y en caso de
+atención a una alerta, también la víctima. \\ \\
+Para implementarlo, \textbf{hay dos componentes:}
  \begin{itemize}
-   \item Provider de mapas: Proporcionan los "tiles" que no son más que imágenes que forman el mapa. OpenStreetMap por ejemplo.
-   \item Controlador: Se encarga de cargar y mostrar los tiles en la pantalla, además de reaccionar a los gestos que hace el usuario para moverse por el mapa. 
+   \item \textbf{Provider de mapas:} Proporcionan los \textit{tiles} que no son más que imágenes que forman el mapa. \textbf{OpenStreetMap, por ejemplo}. Se puede configurar por variables de entorno en la aplicación.
+   \item \textbf{Controlador:} Su función es \textbf{cargar y mostrar los \textit{tiles} en la pantalla}, además de \textbf{reaccionar a los gestos que hace el usuario} para moverse por el mapa. 
  \end{itemize}
 
- Estoy utilizando \href{https://wiki.openstreetmap.org/wiki/Tiles}{openstreetmap como provider}. Y como controlador \href{https://pub.dev/packages/map}{este} porque es bastante maduro, customizable y compatible con cualquier provider.
+ Estoy utilizando \href{https://wiki.openstreetmap.org/wiki/Tiles}{openstreetmap como provider} por ser uno de los pocos que se pueden utilizar gratuitamente. \\ \\
+ Como controlador, \href{https://pub.dev/packages/map}{este}, porque es bastante maduro, customizable y compatible con cualquier provider.
 
 \section{Actualización de la localización}
-Una parte fundamental de la aplicación es tener al día la ubicación del usuario para que sea localizable en situación de alerta.
+Una parte fundamental de la aplicación es tener al día la ubicación del usuario para que \textbf{sea localizable en situación de alerta.} \\
 
-En los siguientes escenarios:
+En cualquiera de los siguientes escenarios:
 \begin{itemize}
-	\item La aplicación está en primer plano.
-	\item La aplicación está abierta en segundo plano.
-	\item La aplicación está cerrada.
+	\item La aplicación está en \textbf{primer plano.}
+	\item La aplicación está \textbf{abierta en segundo plano.}
+	\item La aplicación está \textbf{cerrada.}
 \end{itemize}
 
-Para ello, he usado un isolate, que se comunica con la aplicación por medio de un Port y envía la ubicación actual al servidor.
-Además, usa APIs de Android que sacan partido a varios sensores del dispositivo para disparar este 
-proceso solo cuando el usuario realmente está en movimiento.
-También ha sido necesario registrar plugins como FCM y dotenv en java, para que estén disponibles en el isolate.
+Para ello, \textbf{he usado un isolate} (una hebra de Dart que se ejecuta aislada de la hebra principal, con un event loop independiente), que se comunica con la aplicación por medio de un Port (un canal entre hebras) y envía la ubicación actual al servidor. \\ \\
+Además, usa APIs de Android que sacan partido a varios sensores del dispositivo para \textbf{disparar este 
+proceso solo cuando el usuario realmente está en movimiento.}
+También ha sido necesario registrar plugins como Firebase Cloud Messaging en java, para que estén disponibles en el isolate.
 
 \section{Firebase Cloud Messaging}\label{sec:fib}
-Como he comentado en la sección **REFERENCIAR**, necesitamos un mecanismo para enviar notificaciones push a los usuarios en iOS y Android.
-Además he integrar FCM en el servidor, también tenemos que hacerlo en el cliente para que las notificaciones lleguen en todos los escenarios.
+Como he anticipado en la sección \ref{sec:fibpre}, necesitamos un mecanismo para enviar notificaciones push a los usuarios en iOS y Android.
+Además de integrar FCM en el servidor, también tenemos que hacerlo en el cliente para que las notificaciones lleguen en todos los escenarios.
 
 \begin{itemize}
-	\item La aplicación está en primer plano.
-	\item La aplicación está abierta en segundo plano.
-	\item La aplicación está cerrada.
+	\item La aplicación está en \textbf{primer plano.}
+	\item La aplicación está \textbf{abierta en segundo plano.}
+	\item La aplicación está \textbf{cerrada.}
 \end{itemize}
 
 
@@ -72,18 +92,32 @@ Otra ventaja de usar FCM, es que nos permite obtener de manera sencilla un ident
 
 \section{Websockets}
 
-Para obtener actualizaciones respecto a una alerta una vez la estamos escuchando, utilizamos el endpoint **REFERENCIAR** mediante websockets.
+Para obtener actualizaciones respecto a una alerta una vez la estamos escuchando, utilizamos el endpoint del que hemos hablado en \ref{subsec:websocket} mediante websockets.
 He usado web\_socket\_channel para esto.
 
 \section{Manejo del estado}
-En flutter, como en otros frameworks, se crea un árbol de componentes.
+\textbf{En flutter}, como en otros frameworks, \textbf{se crea un árbol de componentes.}
 Los datos fluyen de arriba a abajo, de padres que saben más a hijos que saben
-menos. Los hijos informan a los padres de cambios mediante callbacks.
-Sin embargo, hay veces que ciertos datos o comportamientos deben ser
-expuestos para muchos componentes. También puede pasar que no se necesiten
-en componentes superficiales y sean necesarios en otros muy profundos. \\
-En un ecosistema tan grande como el de flutter, tenemos varias propuestas, más y
+menos. Y los eventos de abajo a arriba, \textbf{los hijos informan a los padres de cambios mediante callbacks.}
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.3]{tree.png}
+	\caption{Un árbol de componentes}
+	\end{figure}
+Sin embargo, hay veces que \textbf{ciertos datos o comportamientos deben ser
+expuestos para muchos componentes.} También puede pasar que no se necesiten
+en componentes superficiales y sean necesarios en otros muy profundos. \\ \\
+En un ecosistema tan grande como el de Flutter, tenemos varias propuestas, más y
 menos sofisticadas. Redux, BLoC/Rx o MobX son algunos ejemplos, adecuadas
-para casos más pesados.\\
-En mi opinión, para aplicaciones pequeñas/medianas Provider es un "sweet spot"
-entre no usar estado de aplicación y usar uno muy potente. 
+para casos más pesados.\\ \\
+En mi opinión, \textbf{para aplicaciones pequeñas/medianas Provider es un \textit{sweet spot}
+entre no usar estado de aplicación y usar uno muy potente.} \\ \\
+
+Para esta aplicación, tiene mucho sentido porque los datos no tienen estructura jerárquica, como, digamos, un ecommerce. \\
+He utilizado dos providers que \textbf{exponen comportamiento y datos muy cohesionados:}
+\begin{itemize}
+	\item \textbf{Geolocalization provider:} Que ofrece getters y setters sobre el servicio de actualización en segundo plano y la localización actual.
+	\item \textbf{Alert provider:} Que crea y realiza el seguimiento de alertas. También mantiene el estado sobre el rol del usuario (emitiendo alerta, standby, escuchando alerta, etc...).
+\end{itemize}
+
+
