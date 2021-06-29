@@ -89,7 +89,7 @@ Cuando estos casos de uso necesitan utilizar un servicio de infraestructura como
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.7]{di.png}
-	\caption{Inyeccion de dependencias}
+	\caption{Inyección de dependencias}
 	\end{figure}
 
 Asimismo, \textbf{esta separación incrementa mucho la testeabilidad del microservicio,} porque las únicas dependencias
@@ -148,7 +148,9 @@ Se marca una alerta existente como inactiva. Si hay usuarios pendientes de esta 
 \textbf{Al añadir websockets}, teniendo en cuenta que queremos tener escalado horizontal en este servicio,
 \textbf{necesitamos un sistema de publicación/subscripción.} \\
 Para ello, \textbf{he elegido Redis}, que cuenta con una interfaz muy simple. Como librería, ioredis, 
-que es muy robusta y rápida.\\
+que es muy robusta y rápida.\\ \\
+
+Para escalar, tendríamos que añadir más instancias del microservicio y potenciar el cluster de redis para la comunicación entre ellas.
 
 \begin{figure}[H]
 	\centering	
