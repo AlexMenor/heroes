@@ -1,7 +1,7 @@
 \chapter{Frontend}
 La segunda parte del sistema de auxilio es el cliente, \textbf{el código que se ejecuta en el dispositvo del usuario.}
 \section{Elección de la tecnología}
-Nunca hemos tenido más opciones en este sentido:
+Nunca hemos tenido tantas opciones:
 \subsection{Web vs aplicación móvil}
 Para el proyecto considero imprescindible que el cliente sea de la forma de \textbf{una aplicación móvil.} 
 Una web app para este caso de uso la descarto por los siguientes motivos:
@@ -50,6 +50,32 @@ una webview con acceso a APIs nativas via cordova. \\ \\
 	\caption{Funcionamiento del runtime de Dart}
 	\end{figure}
 
+\section{Diseño}
+La parte de la solución que estamos implementando en este proyecto tiene unos inputs muy simples:
+\begin{itemize}
+	\item Activar alerta
+	\item Desactivar alerta
+	\item Escuchar alerta
+	\item Cancelar escucha de alerta
+\end{itemize}
+
+El FAB (floating action button) que se situa abajo a la derecha realiza la primera, segunda y cuarta función. 
+Cambia el icono central y su color dependiendo de la acción que dispara. En el caso de desactivar la alerta,
+también se hace más grande para incluir un texto específico que podemos ver en la figura \ref{fig:alert}.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.6]{mockup.png}
+	\caption{Esquema de la aplicación}
+	\end{figure}
+
+Para escuchar una alerta, ha sido necesario incluir el snackbar, que emerge de la parte inferior de la aplicación cuando es necesario.
+Esto es así, porque el usuario podría necesitar usar el FAB (en caso de necesitar ayuda) incluso si ha recibido una alerta. \\ \\
+
+Por último, para mostrar información tenemos el info banner y el mapa. El primero informa al usuario una vez ha activado
+una alerta de que esto se ha hecho con éxito, también informa de que se puede ver en el mapa la ubicación de la víctima en tiempo real
+si está escuchando una alerta.
+
 \section{Mapa}
 En la aplicación, el mapa es muy protagonista. En él se ve representado el usuario y en caso de
 atención a una alerta, también la víctima. \\ \\
@@ -61,6 +87,12 @@ Para implementarlo, \textbf{hay dos componentes:}
 
  Estoy utilizando \href{https://wiki.openstreetmap.org/wiki/Tiles}{openstreetmap como provider} por ser uno de los pocos que se pueden utilizar gratuitamente. \\ \\
  Como controlador, \href{https://pub.dev/packages/map}{este}, porque es bastante maduro, customizable y compatible con cualquier provider.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{home.png}
+	\caption{Pantalla principal de la aplicación}
+	\end{figure}
 
 \section{Actualización de la localización}
 Una parte fundamental de la aplicación es tener al día la ubicación del usuario para que \textbf{sea localizable en situación de alerta.} \\
@@ -90,13 +122,31 @@ Además de integrar FCM en el servidor, también tenemos que hacerlo en el clien
 
 Otra ventaja de usar FCM, es que nos permite obtener de manera sencilla un identificador único de dispositivo, que podemos usar en el servidor para enviar las notificaciones push.
 
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.8]{notification.png}
+	\caption{Notificación de alerta cuando la aplicación está cerrada}
+	\end{figure}
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{notification-inapp.png}
+	\caption{Notificación de alerta cuando la aplicación está abierta}
+	\end{figure}
+
 \section{Websockets}
 
 Para obtener actualizaciones respecto a una alerta una vez la estamos escuchando, utilizamos el endpoint del que hemos hablado en \ref{subsec:websocket} mediante websockets.
 He usado web\_socket\_channel para esto.
 
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{watch-alert.png}
+	\caption{Pantalla de seguimiento de alerta, actualización de la ubicación de la víctima y del estado de la alerta en tiempo real}
+	\end{figure}
+
 \section{Manejo del estado}
-\textbf{En flutter}, como en otros frameworks, \textbf{se crea un árbol de componentes.}
+\textbf{En flutter}, como en otros frameworks (React, Vue, Angular, etc...), \textbf{se crea un árbol de componentes.}
 Los datos fluyen de arriba a abajo, de padres que saben más a hijos que saben
 menos. Y los eventos de abajo a arriba, \textbf{los hijos informan a los padres de cambios mediante callbacks.}
 \begin{figure}[H]
@@ -113,11 +163,16 @@ para casos más pesados.\\ \\
 En mi opinión, \textbf{para aplicaciones pequeñas/medianas Provider es un \textit{sweet spot}
 entre no usar estado de aplicación y usar uno muy potente.} \\ \\
 
-Para esta aplicación, tiene mucho sentido porque los datos no tienen estructura jerárquica, como, digamos, un ecommerce. \\
+Para esta aplicación, tiene mucho sentido porque los datos no tienen estructura jerárquica, como, digamos, un e-commerce. \\
 He utilizado dos providers que \textbf{exponen comportamiento y datos muy cohesionados:}
 \begin{itemize}
 	\item \textbf{Geolocalization provider:} Que ofrece getters y setters sobre el servicio de actualización en segundo plano y la localización actual.
 	\item \textbf{Alert provider:} Que crea y realiza el seguimiento de alertas. También mantiene el estado sobre el rol del usuario (emitiendo alerta, standby, escuchando alerta, etc...).
 \end{itemize}
 
+\begin{figure}[H]\label{fig:alert}
+	\centering	
+	\includegraphics[scale=0.2]{create-alert.png}
+	\caption{La aplicación después de crear una alerta. Los componentes reaccionan a cambios en los providers.}
+	\end{figure}
 

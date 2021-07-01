@@ -24,7 +24,7 @@ Otras alternativas que he considerado son: Koa, Fastify o Hapi.
 
 \section{Setup de desarrollo}\label{sec:dev}
 
-He invertido tiempo para tener \textbf{un entorno de desarrollo replicable por cualquiera que esté interesado en trabajar en este proyecto.}
+He invertido tiempo en tener \textbf{un entorno de desarrollo replicable por cualquiera que esté interesado en trabajar en este proyecto.}
 Por eso, he usado Docker y Docker Compose. He creado un \textit{Dockerfile} que encapsula el microservicio. 
 \\ Por último, en Docker Compose arranco y comunico el microservicio y los otros procesos (base de datos y pub/sub). \\ \\
 \textbf{Las instrucciones para iniciar un entorno de desarrollo son las siguientes:}
@@ -39,7 +39,7 @@ Podemos simplemente copiar este archivo a otro de nombre \textit{.env} y \textit
 
 \section{Base de datos}
 
-Necesito una base de datos que \textbf{soporte un gran volumen de operaciones y permita consultas basadas en localizaciones geográficas.} \\ \\
+Necesito una base de datos que \textbf{soporte un gran volumen de operaciones (especialmente actualizaciones) y permita consultas basadas en localizaciones geográficas.} \\ \\
 \textbf{En el CAP Theorem necesito la A (de availability) y la P (de partition tolerance), sacrificando la consistencia.}
 \\
 En esta base de datos se almacenará de manera periódica la ubicación de cada uno de los usuarios con el fin de una consulta posterior, que nos permita saber qué usuarios
@@ -56,7 +56,7 @@ escrituras que actualizaciones.
 
 
 
-Tras usar CouchDB me di cuenta de que \textbf{el soporte para queries de geolocalización} \href{https://docs.couchdb.org/en/stable/ddocs/search.html?highlight=geospatial#geographical-searches}{no es bueno}.
+Tras probar CouchDB me di cuenta de que \textbf{el soporte para queries de geolocalización} \href{https://docs.couchdb.org/en/stable/ddocs/search.html?highlight=geospatial#geographical-searches}{no es bueno}.
 
 \textbf{Acabe optando por MongoDB} que \href{https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb}{sí tiene buen soporte}.
 
@@ -64,7 +64,7 @@ Además, puedo habilitar la escritura en replicas para cambiar la consistencia e
 
 \subsection{Configuración de MongoDB}
 
-En el archivo \textit{mongo-init.js} creo el usuario que se va a utilizar desde el microservicio y el índice "2dsphere". 
+En el archivo \textit{mongo-init.js} se crea el usuario que se va a utilizar desde el microservicio y el índice "2dsphere". 
 En Docker Compose lo monto como volumen para que lo pueda usar la instancia que se declara ahí.
 
 \section{Arquitectura limpia}\label{sec:clean}
@@ -73,9 +73,12 @@ He tratado de mantener en todo momento \textbf{el dominio desacoplado de los det
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.3]{clean_arc.png}
+	\caption{Esquema de arquitectura limpia}
 	\end{figure}
 
-Tenemos tres capas bien diferenciadas:
+\textbf{Tenemos tres capas bien diferenciadas:}
+
+
 \subsection{Aplicación}
 En este caso es una \textbf{API REST implementada con Express.} Toma peticiones HTTP, extrae la información, la valida, usa métodos expuestos del dominio y devuelve información.
 Aparte, también hay un endpoint websocket que explico en la subsección \ref{subsec:websocket}. \\
@@ -161,7 +164,7 @@ Para escalar, tendríamos que añadir más instancias del microservicio y potenc
 \subsection{Publisher}
 
 Este servicio simplemente se conecta a Redis y \textbf{publica entidades en el momento en el que se modifican} (ubicaciones y alertas).
-Publica al canal definido con el id de la entidad, esta misma serializada.
+Publica al canal definido con el id de la entidad, esta misma serializada en JSON.
 
 \subsection{Subscriber}
 Este servicio es algo más sofisticado. \textbf{Mantiene en un Map los canales a los que está subscrito y 

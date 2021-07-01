@@ -1,64 +1,178 @@
-\chapter{Implementación}
+\chapter{Frontend}
+La segunda parte del sistema de auxilio es el cliente, \textbf{el código que se ejecuta en el dispositvo del usuario.}
+\section{Elección de la tecnología}
+Nunca hemos tenido tantas opciones:
+\subsection{Web vs aplicación móvil}
+Para el proyecto considero imprescindible que el cliente sea de la forma de \textbf{una aplicación móvil.} 
+Una web app para este caso de uso la descarto por los siguientes motivos:
+\begin{enumerate}
+  \item Una app instalada es \textbf{más accesible} que entrar al navegador y después a una web.
+  \item La cantidad de APIs a las que podemos acceder desde una aplicación es mayor. \textbf{Y necesito acceso a APIs muy concretas que no se pueden usar a traves del navegador.}
+	\item \textbf{Ejecutar procedimientos en segundo plano en una web app cuando está cerrada no es posible.}
+	\item \textbf{Recibir notificaciones push en iOS no es posible por medio de una web app.}
+\end{enumerate}
 
-\section{Backend}
-En esta sección voy a hablar de la implementación del microservicio de geolocalización.
-\subsection{Lenguaje de programación}
-He escogido usar Typescript. Es un lenguaje de tipado gradual que transpila a Javascript.
-Como ventajas sobre Javascript:
+\subsection{Framework de aplicación móvil}
+
+\textbf{¿Qué características son deseables?}
+
+\begin{enumerate}
+  \item \textbf{Una base de código} para iOS y Android.
+  \item \textbf{Paradigma declarativo}, que es más mantenible y claro que el imperativo.
+  \item \textbf{Capacidad para utilizar funcionalidades nativas}, especificas del sistema operativo subyacente.
+\end{enumerate}
+
+\textbf{Por la primera característica, tengo que descartar Android e IOS nativo.} \\
+
+\textbf{Plataformas que la cumplen: }
 \begin{itemize}
-	\item Mejor DX, sobre todo gracias al autocompletado.
-	\item Detección de errores precoz.
+  \item React Native
+  \item Nativescript
+  \item Ionic
+  \item Qasar
+  \item Flutter
 \end{itemize}
-Es cierto, sin embargo, que añade más complejidad en el setup de desarrollo (y también en el de despliegue) del que hablaré más adelante.
-Es más flexible que otros lenguajes tipados estrictos como Java o C\#.
-Como runtime he elegido Node. Es single threaded con non blocking IO, lo cual se ajusta bien al tipo 
-de peticiones que se atienden en el backend (sin cómputos extensos).  \\
-Como alternativa, podría haber elegido Deno, pero tiene un ecosistema aún en crecimiento.
 
-\section{Framework}
-La API será REST, necesitamos un framework para implementar esta interfaz. \\
+\textbf{Flutter vs React native}: Si bien es cierto que React Native tiene a favor la popularidad, un lenguaje al que ya estoy habituado y más estabilidad, es más lento que Flutter y hace una traducción de componentes a código nativo.
+\textbf{Con Flutter sin embargo hay total control de los componentes y se muestran igual en las dos plataformas.} \\ \\
 
-He decido usar express. Es un framework muy establecido y unopinionated. Esto tiene importancia en la 
-arquitectura limpia que explico en la sección **REFERENCIAR**. 
+\textbf{Qasar e Ionic vs React native}: Qasar e Ionic son muy parecidos a React Native con menos popularidad, más posibilidad de frameworks como Vue o Angular pero usando 
+una webview con acceso a APIs nativas via cordova. \\ \\
 
-\section{Setup de desarrollo}
+\textbf{Nativescript vs React Native:} Nativescript por último es similar a React Native, también en el método, ya que accede directamente a APIs nativas. \\ \\
 
-Para tener un entorno de desarrollo replicable por cualquiera que esté interesado en trabajar en este proyecto, 
-he usado Docker y Docker Compose. He creado un Dockerfile que encapsula el microservicio. 
-Por último, en Docker Compose comunico el microservicio y los otros procesos (base de datos y pub/sub).
+\subsection{Lenguaje en la aplicación móvil}
+\textbf{Flutter usa Dart}, que es un lenguaje tipado que recuerda a Typescript: también con una hebra única y E/S no bloqueante.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.6]{dart.png}
+	\caption{Funcionamiento del runtime de Dart}
+	\end{figure}
+
+\section{Diseño}
+La parte de la solución que estamos implementando en este proyecto tiene unos inputs muy simples:
+\begin{itemize}
+	\item Activar alerta
+	\item Desactivar alerta
+	\item Escuchar alerta
+	\item Cancelar escucha de alerta
+\end{itemize}
+
+El FAB (floating action button) que se situa abajo a la derecha realiza la primera, segunda y cuarta función. 
+Cambia el icono central y su color dependiendo de la acción que dispara. En el caso de desactivar la alerta,
+también se hace más grande para incluir un texto específico que podemos ver en la figura \ref{fig:alert}.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.6]{mockup.png}
+	\caption{Esquema de la aplicación}
+	\end{figure}
+
+Para escuchar una alerta, ha sido necesario incluir el snackbar, que emerge de la parte inferior de la aplicación cuando es necesario.
+Esto es así, porque el usuario podría necesitar usar el FAB (en caso de necesitar ayuda) incluso si ha recibido una alerta. \\ \\
+
+Por último, para mostrar información tenemos el info banner y el mapa. El primero informa al usuario una vez ha activado
+una alerta de que esto se ha hecho con éxito, también informa de que se puede ver en el mapa la ubicación de la víctima en tiempo real
+si está escuchando una alerta.
+
+\section{Mapa}
+En la aplicación, el mapa es muy protagonista. En él se ve representado el usuario y en caso de
+atención a una alerta, también la víctima. \\ \\
+Para implementarlo, \textbf{hay dos componentes:}
+ \begin{itemize}
+   \item \textbf{Provider de mapas:} Proporcionan los \textit{tiles} que no son más que imágenes que forman el mapa. \textbf{OpenStreetMap, por ejemplo}. Se puede configurar por variables de entorno en la aplicación.
+   \item \textbf{Controlador:} Su función es \textbf{cargar y mostrar los \textit{tiles} en la pantalla}, además de \textbf{reaccionar a los gestos que hace el usuario} para moverse por el mapa. 
+ \end{itemize}
+
+ Estoy utilizando \href{https://wiki.openstreetmap.org/wiki/Tiles}{openstreetmap como provider} por ser uno de los pocos que se pueden utilizar gratuitamente. \\ \\
+ Como controlador, \href{https://pub.dev/packages/map}{este}, porque es bastante maduro, customizable y compatible con cualquier provider.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{home.png}
+	\caption{Pantalla principal de la aplicación}
+	\end{figure}
+
+\section{Actualización de la localización}
+Una parte fundamental de la aplicación es tener al día la ubicación del usuario para que \textbf{sea localizable en situación de alerta.} \\
+
+En cualquiera de los siguientes escenarios:
+\begin{itemize}
+	\item La aplicación está en \textbf{primer plano.}
+	\item La aplicación está \textbf{abierta en segundo plano.}
+	\item La aplicación está \textbf{cerrada.}
+\end{itemize}
+
+Para ello, \textbf{he usado un isolate} (una hebra de Dart que se ejecuta aislada de la hebra principal, con un event loop independiente), que se comunica con la aplicación por medio de un Port (un canal entre hebras) y envía la ubicación actual al servidor. \\ \\
+Además, usa APIs de Android que sacan partido a varios sensores del dispositivo para \textbf{disparar este 
+proceso solo cuando el usuario realmente está en movimiento.}
+También ha sido necesario registrar plugins como Firebase Cloud Messaging en java, para que estén disponibles en el isolate.
+
+\section{Firebase Cloud Messaging}\label{sec:fib}
+Como he anticipado en la sección \ref{sec:fibpre}, necesitamos un mecanismo para enviar notificaciones push a los usuarios en iOS y Android.
+Además de integrar FCM en el servidor, también tenemos que hacerlo en el cliente para que las notificaciones lleguen en todos los escenarios.
+
+\begin{itemize}
+	\item La aplicación está en \textbf{primer plano.}
+	\item La aplicación está \textbf{abierta en segundo plano.}
+	\item La aplicación está \textbf{cerrada.}
+\end{itemize}
 
 
-\section{Base de datos}
+Otra ventaja de usar FCM, es que nos permite obtener de manera sencilla un identificador único de dispositivo, que podemos usar en el servidor para enviar las notificaciones push.
 
-Necesito una base de datos que soporte un gran volumen de operaciones y permita consultas basadas en localizaciones geográficas. Es decir, en el CAP Theorem necesito la A y la P.
-En esta base de datos se almacenará de manera periódica la ubicación de cada uno de los usuarios con el fin de una consulta posterior, que nos permita saber qué usuarios
-están cerca de una persona que necesita ayuda. Por ello, es más que suficiente la consistencia eventual.
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.8]{notification.png}
+	\caption{Notificación de alerta cuando la aplicación está cerrada}
+	\end{figure}
 
-\subsection{Opciones}
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{notification-inapp.png}
+	\caption{Notificación de alerta cuando la aplicación está abierta}
+	\end{figure}
 
-MongoDB tiene buen soporte para geo-queries, de hecho vienen ya instaladas, pero mongo prioriza la consistencia antes que la disponibilidad. Postgres, con PostGIS, también soporta bien
-este tipo de consultas, pero prioriza la consistencia a la tolerancia a la partición. \\
-CouchDB, Dynamo y Cassandra son sistemas con alta disponibilidad y tolerancia a la partición. CouchDB es la mejor opción porque Dynamo es privativa y Cassandra es más adecuada para aplicaciones con más
-escrituras que actualizaciones. 
+\section{Websockets}
 
-Tras usar couchDB me di cuenta de que el soporte para queries de geolocalización \href{https://docs.couchdb.org/en/stable/ddocs/search.html?highlight=geospatial#geographical-searches}{no es bueno}.
+Para obtener actualizaciones respecto a una alerta una vez la estamos escuchando, utilizamos el endpoint del que hemos hablado en \ref{subsec:websocket} mediante websockets.
+He usado web\_socket\_channel para esto.
 
-Opto por tanto por MongoDB que \href{https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb}{sí tiene buen soporte}.
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{watch-alert.png}
+	\caption{Pantalla de seguimiento de alerta, actualización de la ubicación de la víctima y del estado de la alerta en tiempo real}
+	\end{figure}
 
-Además, puedo habilitar la escritura en replicas para cambiar la consistencia por consistencia eventual y tener más disponibilidad. \href{https://stackoverflow.com/questions/11292215/where-does-mongodb-stand-in-the-cap-theorem}{Explicado aquí.}
+\section{Manejo del estado}
+\textbf{En flutter}, como en otros frameworks (React, Vue, Angular, etc...), \textbf{se crea un árbol de componentes.}
+Los datos fluyen de arriba a abajo, de padres que saben más a hijos que saben
+menos. Y los eventos de abajo a arriba, \textbf{los hijos informan a los padres de cambios mediante callbacks.}
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.3]{tree.png}
+	\caption{Un árbol de componentes}
+	\end{figure}
+Sin embargo, hay veces que \textbf{ciertos datos o comportamientos deben ser
+expuestos para muchos componentes.} También puede pasar que no se necesiten
+en componentes superficiales y sean necesarios en otros muy profundos. \\ \\
+En un ecosistema tan grande como el de Flutter, tenemos varias propuestas, más y
+menos sofisticadas. Redux, BLoC/Rx o MobX son algunos ejemplos, adecuadas
+para casos más pesados.\\ \\
+En mi opinión, \textbf{para aplicaciones pequeñas/medianas Provider es un \textit{sweet spot}
+entre no usar estado de aplicación y usar uno muy potente.} \\ \\
 
-\section{Arquitectura limpia}
+Para esta aplicación, tiene mucho sentido porque los datos no tienen estructura jerárquica, como, digamos, un e-commerce. \\
+He utilizado dos providers que \textbf{exponen comportamiento y datos muy cohesionados:}
+\begin{itemize}
+	\item \textbf{Geolocalization provider:} Que ofrece getters y setters sobre el servicio de actualización en segundo plano y la localización actual.
+	\item \textbf{Alert provider:} Que crea y realiza el seguimiento de alertas. También mantiene el estado sobre el rol del usuario (emitiendo alerta, standby, escuchando alerta, etc...).
+\end{itemize}
 
-He tratado de mantener en todo momento el dominio desacoplado de los detalles de implementación.
-
-Tenemos tres capas bien diferenciadas:
-\subsection{Aplicación}
-En este caso es una API Rest implementada con express. Toma peticiones http, extrae la información, la valida, usa métodos expuestos del dominio y devuelve información.
-Aparte, también hay un endpoint websocket que explico en **REFERENCIAR**.
-\subsection{Dominio}
-Tipos y procesos que exclusivamente representan el dominio.
-Cuando se necesita ''materializar'' algo, se declaran interfaces. Por ejemplo, interfaz Persistencia.
-\subsection{Infraestructura} 
-Son servicios que implementan las interfaces de las que acabo de hablar.
-En este capa está la lógica para conectarse a los distintos servicios: Bases de datos, mensajería, etc...
+\begin{figure}[H]\label{fig:alert}
+	\centering	
+	\includegraphics[scale=0.2]{create-alert.png}
+	\caption{La aplicación después de crear una alerta. Los componentes reaccionan a cambios en los providers.}
+	\end{figure}
 
