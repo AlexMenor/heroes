@@ -2,7 +2,7 @@
 
 En esta sección voy a hablar de \textbf{la implementación del microservicio de geolocalización}, el backend del sistema de auxilio.
 \section{Lenguaje de programación}
-He decidido usar \textbf{Typescript.} Es un lenguaje de tipado gradual que transpila a Javascript.
+He decidido usar \textbf{Typescript} \cite{typescript}. Es un lenguaje de tipado gradual que transpila a Javascript.
 Como ventajas sobre Javascript:
 \begin{itemize}
 	\item Mejor \textit{developer experience}, sobre todo gracias al autocompletado.
@@ -11,28 +11,28 @@ Como ventajas sobre Javascript:
 Es cierto, sin embargo, que añade más complejidad en el setup de desarrollo (y también en el de despliegue) del que hablo en la sección \ref{sec:dev}. \\ \\
 \textbf{Considero que es un \textit{sweet spot} entre la excesiva libertad en Javascript y la rigidez de lenguajes tipados estrictos como Java o C\#.} \\ \\
 
-\textbf{Como runtime he elegido Node.} Utiliza una sola hebra con E/S no bloqeuante, lo cual se ajusta bien al tipo 
+\textbf{Como runtime he elegido Node \cite{nodejs}.} Utiliza una sola hebra con E/S no bloqeuante, lo cual se ajusta bien al tipo 
 de peticiones que se atienden en este backend (sin cómputos extensos).  \\ \\
-Como alternativa, podría haber elegido Deno, pero no tiene un ecosistema aún tan desarrollado.
+Como alternativa, podría haber elegido Deno \cite{deno}, pero no tiene un ecosistema aún tan desarrollado.
 
 \section{Framework}
-\textbf{La API será, por simplicidad, REST.} Necesitamos un framework para implementar esta interfaz. \\
+\textbf{La API será, por simplicidad, REST \cite{rest}.} Necesitamos un framework para implementar esta interfaz. \\
 
-\textbf{He decido usar Express. Es un framework \textit{unopinionated} muy consolidado.} Esto tiene importancia en la 
+\textbf{He decido usar Express \cite{express}. Es un framework \textit{unopinionated} muy consolidado.} Esto tiene importancia en la 
 arquitectura limpia que explico en la sección \ref{sec:clean}. \\
 Otras alternativas que he considerado son: Koa, Fastify o Hapi.
 
 \section{Setup de desarrollo}\label{sec:dev}
 
 He invertido tiempo en tener \textbf{un entorno de desarrollo replicable por cualquiera que esté interesado en trabajar en este proyecto.}
-Por eso, he usado Docker y Docker Compose. He creado un \textit{Dockerfile} que encapsula el microservicio. 
+Por eso, he usado Docker y Docker Compose \cite{docker}. He creado un \textit{Dockerfile} que encapsula el microservicio. 
 \\ Por último, en Docker Compose arranco y comunico el microservicio y los otros procesos (base de datos y pub/sub). \\ \\
 \textbf{Las instrucciones para iniciar un entorno de desarrollo son las siguientes:}
 
 \begin{enumerate}
 	\item En el archivo \textit{.env.template} están recogidas las variables de entorno que hacen falta para configurar este microservicio.
 Podemos simplemente copiar este archivo a otro de nombre \textit{.env} y \textit{dotenv} se encargará de usarlas (ver sección \ref{sec:config}).
-\item También necesitamos un archivo \textit{serviceAccountKey.json} que se puede obtener en Firebase Cloud Messaging y que hay que situar en este directorio. 
+\item También necesitamos un archivo \textit{serviceAccountKey.json} que se puede obtener en Firebase Cloud Messaging \cite{firebase} y que hay que situar en este directorio. 
 (En el .gitignore está declarado este archivo porque contiene claves privadas.)
 \item Una vez hecho esto, simplemente ejecutamos: \textbf{\textit{docker-compose up}}.
 \end{enumerate}
@@ -40,7 +40,7 @@ Podemos simplemente copiar este archivo a otro de nombre \textit{.env} y \textit
 \section{Base de datos}
 
 Necesito una base de datos que \textbf{soporte un gran volumen de operaciones (especialmente actualizaciones) y permita consultas basadas en localizaciones geográficas.} \\ \\
-\textbf{En el CAP Theorem necesito la A (de availability) y la P (de partition tolerance), sacrificando la consistencia.}
+\textbf{En el CAP Theorem \cite{cap} necesito la A (de availability) y la P (de partition tolerance), sacrificando la consistencia.}
 \\
 En esta base de datos se almacenará de manera periódica la ubicación de cada uno de los usuarios con el fin de una consulta posterior, que nos permita saber qué usuarios
 están cerca de una persona que necesita ayuda. Por ello, es más que suficiente la consistencia eventual.
@@ -48,19 +48,19 @@ están cerca de una persona que necesita ayuda. Por ello, es más que suficiente
 \subsection{Opciones}
 
 \begin{itemize}
-	\item \textbf{MongoDB tiene buen soporte para \textit{geo-queries}}, de hecho vienen ya instaladas, sin embargo, \textbf{prioriza la consistencia antes que la disponibilidad.}
-\item \textbf{PostgreSQL}, con PostGIS, \textbf{también soporta bien este tipo de consultas, pero prioriza la consistencia a la tolerancia a la partición.} 
+	\item \textbf{MongoDB tiene buen soporte para \textit{geo-queries}} \cite{mongo}, de hecho vienen ya instaladas, sin embargo, \textbf{prioriza la consistencia antes que la disponibilidad \cite{mongo-cap}.} 
+\item \textbf{PostgreSQL}, con PostGIS \cite{postgis}, \textbf{también soporta bien este tipo de consultas, pero prioriza la consistencia a la tolerancia a la partición.} 
 \item \textbf{CouchDB, Dynamo y Cassandra son sistemas con alta disponibilidad y tolerancia a la partición.} CouchDB es la mejor opción porque Dynamo es privativa y Cassandra es más adecuada para aplicaciones con más
-escrituras que actualizaciones. 
+escrituras que actualizaciones \cite{cassandra}. 
 \end{itemize}
 
 
 
-Tras probar CouchDB me di cuenta de que \textbf{el soporte para queries de geolocalización} \href{https://docs.couchdb.org/en/stable/ddocs/search.html?highlight=geospatial#geographical-searches}{no es bueno}.
+Tras probar CouchDB me di cuenta de que \textbf{el soporte para queries de geolocalización} no es bueno \cite{couchdb}.
 
-\textbf{Acabe optando por MongoDB} que \href{https://stackoverflow.com/questions/25734092/query-locations-within-a-radius-in-mongodb}{sí tiene buen soporte}.
+\textbf{Acabe optando por MongoDB} que sí tiene buen soporte.
 
-Además, puedo habilitar la escritura en replicas para cambiar la consistencia estricta por consistencia eventual y tener más disponibilidad. \href{https://stackoverflow.com/questions/11292215/where-does-mongodb-stand-in-the-cap-theorem}{Explicado aquí.}
+Además, puedo habilitar la escritura en replicas para cambiar la consistencia estricta por consistencia eventual y tener más disponibilidad. 
 
 \subsection{Configuración de MongoDB}
 
@@ -73,7 +73,7 @@ He tratado de mantener en todo momento \textbf{el dominio desacoplado de los det
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.3]{clean_arc.png}
-	\caption{Esquema de arquitectura limpia}
+	\caption{Esquema de arquitectura limpia \cite{clean-arch}}
 	\end{figure}
 
 \textbf{Tenemos tres capas bien diferenciadas:}
@@ -150,7 +150,7 @@ Se marca una alerta existente como inactiva. Si hay usuarios pendientes de esta 
 \section{Pub/Sub}\label{sec:pubsub}
 \textbf{Al añadir websockets}, teniendo en cuenta que queremos tener escalado horizontal en este servicio,
 \textbf{necesitamos un sistema de publicación/subscripción.} \\
-Para ello, \textbf{he elegido Redis}, que cuenta con una interfaz muy simple. Como librería, ioredis, 
+Para ello, \textbf{he elegido Redis \cite{redis}}, que cuenta con una interfaz muy simple. Como librería, ioredis, 
 que es muy robusta y rápida.\\ \\
 
 Para escalar, tendríamos que añadir más instancias del microservicio y potenciar el cluster de redis para la comunicación entre ellas.
