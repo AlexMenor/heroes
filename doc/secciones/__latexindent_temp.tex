@@ -26,11 +26,11 @@ Una web app para este caso de uso la descarto por los siguientes motivos:
 
 \textbf{Plataformas que la cumplen: }
 \begin{itemize}
-  \item React Native
-  \item Nativescript
-  \item Ionic
-  \item Qasar
-  \item Flutter
+  \item React Native \cite{reactnative}
+  \item Nativescript \cite{nativescript}
+  \item Ionic \cite{ionic}
+  \item Quasar \cite{Quasar}
+  \item Flutter \cite{flutter}
 \end{itemize}
 
 \textbf{Flutter vs React native}: Si bien es cierto que React Native tiene a favor la popularidad, un lenguaje al que ya estoy habituado y más estabilidad, es más lento que Flutter y hace una traducción de componentes a código nativo.
@@ -42,7 +42,7 @@ una webview con acceso a APIs nativas via cordova. \\ \\
 \textbf{Nativescript vs React Native:} Nativescript por último es similar a React Native, también en el método, ya que accede directamente a APIs nativas. \\ \\
 
 \subsection{Lenguaje en la aplicación móvil}
-\textbf{Flutter usa Dart}, que es un lenguaje tipado que recuerda a Typescript: también con una hebra única y E/S no bloqueante.
+\textbf{Flutter usa Dart} \cite{dart}, que es un lenguaje tipado que recuerda a Typescript: también con una hebra única y E/S no bloqueante.
 
 \begin{figure}[H]
 	\centering	
@@ -85,7 +85,7 @@ Para implementarlo, \textbf{hay dos componentes:}
    \item \textbf{Controlador:} Su función es \textbf{cargar y mostrar los \textit{tiles} en la pantalla}, además de \textbf{reaccionar a los gestos que hace el usuario} para moverse por el mapa. 
  \end{itemize}
 
- Estoy utilizando openstreetmap como provider \cite{openstreetmap} por ser uno de los pocos que se pueden utilizar gratuitamente. \\ \\
+ Estoy utilizando OpenStreetMap como provider \cite{openstreetmap} por ser uno de los pocos que se pueden utilizar gratuitamente. \\ \\
  Como controlador, Map Controller Library \cite{map}, porque es bastante maduro, customizable y compatible con cualquier provider.
 
 \begin{figure}[H]
@@ -137,7 +137,7 @@ Otra ventaja de usar FCM, es que nos permite obtener de manera sencilla un ident
 \section{Websockets}
 
 Para obtener actualizaciones respecto a una alerta una vez la estamos escuchando, utilizamos el endpoint del que hemos hablado en \ref{subsec:websocket} mediante websockets.
-He usado web\_socket\_channel para esto.
+He usado una librería \cite{websocketchannel} para esto.
 
 \begin{figure}[H]
 	\centering	

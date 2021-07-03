@@ -14,6 +14,7 @@ Es cierto, sin embargo, que añade más complejidad en el setup de desarrollo (y
 \textbf{Como runtime he elegido Node \cite{nodejs}.} Utiliza una sola hebra con E/S no bloqeuante, lo cual se ajusta bien al tipo 
 de peticiones que se atienden en este backend (sin cómputos extensos).  \\ \\
 Como alternativa, podría haber elegido Deno \cite{deno}, pero no tiene un ecosistema aún tan desarrollado.
+Como gestor de paquetes, he utilizado NPM \cite{npm}.
 
 \section{Framework}
 \textbf{La API será, por simplicidad, REST \cite{rest}.} Necesitamos un framework para implementar esta interfaz. \\
@@ -98,7 +99,7 @@ Cuando estos casos de uso necesitan utilizar un servicio de infraestructura como
 Asimismo, \textbf{esta separación incrementa mucho la testeabilidad del microservicio,} porque las únicas dependencias
 que puede tener esta capa forman parte del lenguaje de programación. Podemos usar \textit{mocks} para implementar
 las interfaces de infraestructura y probar todas las posibles respuestas de estos servicios. \\ \\
-Por último, he comentado concienzuadamente las interfaces con \textbf{js-doc} para facilitar la implementación de otros servicios.
+Por último, he comentado concienzuadamente las interfaces con \textbf{JSDoc} para facilitar la implementación de otros servicios.
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.9]{jsdoc.png}
@@ -181,7 +182,7 @@ Cuando un websocket se cierra, las subscripciones asociadas desaparecen de esta 
 notificaciones push.} Para esto he usado Firebase Cloud Messaging, del que hablo más en la sección \ref{sec:fib}.
 
 \section{Tests}\label{sec:tests}
-En este microservicio uso Jest y Supertest para \textbf{testear las capas de aplicación y dominio, con mocks de la capa de infraestructura.} \\ \\
+En este microservicio uso Jest y Supertest \cite{supertest} para \textbf{testear las capas de aplicación y dominio, con mocks de la capa de infraestructura.} \\ \\
 Como próximos pasos, deberíamos implementar tests unitarios para la capa de dominio y especialmente la de infraestructura.
 \begin{figure}[H]
 	\centering	

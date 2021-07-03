@@ -21,6 +21,7 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{appendix}
 
 \usepackage[table,xcdraw]{xcolor}
 \hypersetup{
@@ -66,9 +67,6 @@
 	\newpage
 	\listoffigures
 
-	% Si hay suficientes se incluirá dicho índice
-	\listoftables 
-	\newpage
 
 	\input{secciones/01_introduccion}
 
@@ -78,14 +76,13 @@
 
 	\input{secciones/04_frontend}
 
-	\input{secciones/07_conclusiones}
-
-
-
 	
 	\newpage
 	\bibliography{bibliografia}
 	\bibliographystyle{plain}
+
+	\appendix
+	\input{secciones/personas.tex}
 	
 \end{document}
 
