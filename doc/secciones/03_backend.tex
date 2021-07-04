@@ -11,7 +11,7 @@ Como ventajas sobre Javascript:
 Es cierto, sin embargo, que añade más complejidad en el setup de desarrollo (y también en el de despliegue) del que hablo en la sección \ref{sec:dev}. \\ \\
 \textbf{Considero que es un \textit{sweet spot} entre la excesiva libertad en Javascript y la rigidez de lenguajes tipados estrictos como Java o C\#.} \\ \\
 
-\textbf{Como runtime he elegido Node \cite{nodejs}.} Utiliza una sola hebra con E/S no bloqeuante, lo cual se ajusta bien al tipo 
+\textbf{Como runtime he elegido Node \cite{nodejs}.} Utiliza una sola hebra con E/S no bloqueante, lo cuál se ajusta bien al tipo 
 de peticiones que se atienden en este backend (sin cómputos extensos).  \\ \\
 Como alternativa, podría haber elegido Deno \cite{deno}, pero no tiene un ecosistema aún tan desarrollado.
 Como gestor de paquetes, he utilizado NPM \cite{npm}.
@@ -20,7 +20,7 @@ Como gestor de paquetes, he utilizado NPM \cite{npm}.
 \textbf{La API será, por simplicidad, REST \cite{rest}.} Necesitamos un framework para implementar esta interfaz. \\
 
 \textbf{He decido usar Express \cite{express}. Es un framework \textit{unopinionated} muy consolidado.} Esto tiene importancia en la 
-arquitectura limpia que explico en la sección \ref{sec:clean}. \\
+arquitectura limpia, que explico en la sección \ref{sec:clean}. \\
 Otras alternativas que he considerado son: Koa, Fastify o Hapi.
 
 \section{Setup de desarrollo}\label{sec:dev}
@@ -44,7 +44,7 @@ Necesito una base de datos que \textbf{soporte un gran volumen de operaciones (e
 \textbf{En el CAP Theorem \cite{cap} necesito la A (de availability) y la P (de partition tolerance), sacrificando la consistencia.}
 \\
 En esta base de datos se almacenará de manera periódica la ubicación de cada uno de los usuarios con el fin de una consulta posterior, que nos permita saber qué usuarios
-están cerca de una persona que necesita ayuda. Por ello, es más que suficiente la consistencia eventual.
+están cerca de una persona que necesita ayuda. Por ello, es más que suficiente la \textbf{consistencia eventual.}
 
 \subsection{Opciones}
 
@@ -66,7 +66,7 @@ Además, puedo habilitar la escritura en replicas para cambiar la consistencia e
 \subsection{Configuración de MongoDB}
 
 En el archivo \textit{mongo-init.js} se crea el usuario que se va a utilizar desde el microservicio y el índice "2dsphere". 
-En Docker Compose lo monto como volumen para que lo pueda usar la instancia que se declara ahí.
+En Docker Compose lo monto como volumen para que lo pueda ejecutar en tiempo de inicialización la instancia que se declara ahí.
 
 \section{Arquitectura limpia}\label{sec:clean}
 
@@ -82,14 +82,15 @@ He tratado de mantener en todo momento \textbf{el dominio desacoplado de los det
 
 \subsection{Aplicación}
 En este caso es una \textbf{API REST implementada con Express.} Toma peticiones HTTP, extrae la información, la valida, usa métodos expuestos del dominio y devuelve información.
-Aparte, también hay un endpoint websocket que explico en la subsección \ref{subsec:websocket}. \\
-Considero importante separar bien esta capa del servicio que consume. Con esto, sería sencillo dejar de usar 
-REST para utilizar \textit{SOAP} o \textit{GraphQL}, por ejemplo.
+Aparte, también hay un endpoint \textbf{websocket} que explico en la subsección \ref{subsec:websocket}. \\
+Considero importante separar bien esta capa del servicio de dominio que consume. Con esto, sería sencillo dejar de usar 
+REST para utilizar \textit{SOAP} o \textit{GraphQL}, por ejemplo. \textbf{Incluso podríamos utilizar otro framework con esfuerzo mínimo.}
 
 \subsection{Dominio}
 \textbf{Tipos y casos de uso que pertenecen exclusivamente al dominio.}
 Cuando estos casos de uso necesitan utilizar un servicio de infraestructura como el de persistencia, por ejemplo,
 \textbf{se depende exclusivamente de una interfaz que describe esa función y se inyecta en tiempo de ejecución un servicio que la implemente (inyección de dependencias).}
+\\Evitamos diseñar el sistema alrededor de su infraestructura, por ejemplo, una determinada base de datos, \textbf{en favor de hacerlo alrededor del dominio.}
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.7]{di.png}
@@ -99,7 +100,7 @@ Cuando estos casos de uso necesitan utilizar un servicio de infraestructura como
 Asimismo, \textbf{esta separación incrementa mucho la testeabilidad del microservicio,} porque las únicas dependencias
 que puede tener esta capa forman parte del lenguaje de programación. Podemos usar \textit{mocks} para implementar
 las interfaces de infraestructura y probar todas las posibles respuestas de estos servicios. \\ \\
-Por último, he comentado concienzuadamente las interfaces con \textbf{JSDoc} para facilitar la implementación de otros servicios.
+Por último, he comentado concienzuadamente las interfaces con \textbf{JSDoc} \cite{jsdoc} para facilitar la implementación de otros servicios.
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.9]{jsdoc.png}
@@ -121,7 +122,7 @@ Descripción en líneas generales de los tipos de peticiones que debe atender el
 \subsection{Crear/Actualizar ubicación}\label{op:ubi}
 Toma unas coordenadas y un id de usuario y persiste en la base de datos.
 Esta operación es indispensble para avisar a los usuarios cercanos a una emergencia y para 
-actualizarles sobre la posición de una víctima (publicando la ubicación actualizada en el pub/sub, sección \ref{sec:pubsub}).
+actualizarlos sobre la posición de una víctima (publicando la ubicación actualizada en el pub/sub, sección \ref{sec:pubsub}).
 
 \subsection{Crear alerta}
 Verificando antes que el usuario no tiene ya otra alerta en curso, la persiste.
@@ -149,7 +150,7 @@ Se marca una alerta existente como inactiva. Si hay usuarios pendientes de esta 
 
 
 \section{Pub/Sub}\label{sec:pubsub}
-\textbf{Al añadir websockets}, teniendo en cuenta que queremos tener escalado horizontal en este servicio,
+\textbf{Al usar websockets}, teniendo en cuenta que queremos tener escalado horizontal en este servicio,
 \textbf{necesitamos un sistema de publicación/subscripción.} \\
 Para ello, \textbf{he elegido Redis \cite{redis}}, que cuenta con una interfaz muy simple. Como librería, ioredis, 
 que es muy robusta y rápida.\\ \\

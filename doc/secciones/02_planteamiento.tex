@@ -4,13 +4,13 @@ Vamos a plantear de forma general una implementación y cómo aseguramos la cali
 
 \section{Metodología}
 
-Necesito una metodología que ponga al usuario en el centro y permita una retroalimentación rápida.\\
+Necesito una metodología \textbf{que ponga al usuario en el centro} y permita una \textbf{retroalimentación rápida.} Por eso, evitamos la documentación intensiva de requisitos y más diagramas de los necesarios, propios de la metodología \textit{waterfall} \cite{waterfall}.\\
 Aplicando técnicas de design thinking, se ha hecho un análisis de "Personas" \cite{personas}. Ver anexo \ref{anexo}.
-\\
+\\\\
 Lo ideal, es que estos conceptos que expongo más abajo tengan su representación en el sistema que utilicemos
-para administrar estas tareas, en mi caso, GitHub. \\ \\
-Por otra parte, es importante que \textbf{los commits referencien a estas tareas.} De esta forma, podemos
-saber no solo quién ha escrito una línea de código sino también \textbf{por qué está ahí.} Es una forma de documentar el código.
+para administrar estas tareas, en mi caso, GitHub. 
+De esta forma \textbf{los commits pueden referenciar a estas tareas.} Así podemos
+saber no solo quién ha escrito una línea de código sino también \textbf{por qué,} ya que el código siempre debe surgir de una necesidad de nuestros usuarios. 
 \begin{figure}[H]
 \centering	
 \includegraphics[scale=0.6]{git.png}
@@ -26,7 +26,7 @@ reflejado como proyectos dentro del repositorio de GitHub \cite{repo}.
 
 \subsection{Épica}
 Una iniciativa está formada por varias épicas. \textbf{Una épica por si sola no es una solución al problema}, pero todas las épicas de una iniciativa contribuyen a la solución.
-Por ejemplo, para la iniciativa el sistema de auxilio, que es en la que se centra este trabajo, tenemos 
+Por ejemplo, para la iniciativa del sistema de auxilio, tenemos 
 como épicas el frontend y el backend. Se reflejan en GitHub como milestones.
 \begin{figure}[H]
 	\centering
@@ -45,7 +45,7 @@ A la hora de implementar una historia de usuario, esta se puede definir con requ
 	\end{figure}
 
 \subsection{Issues}
-Cuando no se obtiene el comportamiento esperado, podemos abrir un issue que se cerrará con un commit que lo solucione.
+\textbf{Cuando no se obtiene el comportamiento esperado}, podemos abrir un issue que se cerrará con un commit que lo solucione e idealmente un test que lo detecte.
 
 \begin{figure}[H]
 	\centering	
