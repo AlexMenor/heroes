@@ -4,21 +4,33 @@ Antes de hablar de detalles de implementación, tenemos que pensar en la metodol
 
 \section{Metodología}
 
-Necesito una metodología \textbf{que ponga al usuario en el centro} y permita una \textbf{retroalimentación rápida.} Por eso, evitamos la documentación intensiva de requisitos y más diagramas de los necesarios, propios de la metodología \textit{waterfall} \cite{waterfall}.\\
-Aplicando técnicas de design thinking, se ha hecho un análisis de "Personas" \cite{personas}. Ver anexo \ref{anexo}.
-\\\\
-Lo ideal, es que estos conceptos que expongo más abajo tengan su representación en el sistema que utilicemos
-para administrar estas tareas, en mi caso, GitHub. 
-De esta forma \textbf{los commits pueden referenciar a estas tareas.} Así podemos
-saber no solo quién ha escrito una línea de código sino también \textbf{por qué,} ya que el código siempre debe surgir de una necesidad de nuestros usuarios. 
+Necesito una metodología \textbf{que ponga al usuario en el centro} y permita una \textbf{retroalimentación rápida.} \\
+\textbf{La metodología ágil} evita la documentación intensiva de requisitos y más diagramas de los necesarios, en favor de la iteración y la adaptación a requisitos cambiantes.\\
+
+Otro principio de esta filosofía son las aportaciones frecuentes de código que aporten valor al usuario. Para esto, 
+necesitamos organizar la funcionalidad en bloques y asegurarnos de que los cambios en el código siempre surgen
+de una necesidad del usuario.
+\begin{enumerate}
+	\item Los conceptos que expongo más abajo ayudan a esa organización.
+	\item Es importante que \textbf{los commits pueden referencien a estas tareas.} Así podemos
+saber no solo quién ha escrito una línea de código sino también \textbf{por qué}, que siempre deberá responderse con una historia de usuario (\ref{subsec:hu}) o un issue (\ref{subsec:issue}).
+\end{enumerate}
+
 \begin{figure}[H]
 \centering	
 \includegraphics[scale=0.6]{git.png}
 \end{figure}
-\subsection{Iniciativas}
+
+Además, aplicando técnicas de design thinking, se ha hecho un análisis de "Personas" \cite{personas}. Ver anexo \ref{anexo}.
+
+\subsection{Control de versiones}
+Como sistema de control de versiones utilizo Git y como repositorio remoto GitHub \cite{repo}. Además, como veremos en la sección \ref{sec:inc} y \ref{sec:cal} GitHub
+también nos permite implementar los flujos de integración continua y organizar las tareas.
+
+\subsection{Iniciativas}\label{sec:inc}
 \textbf{Son grandes grupos de funcionalidad, independientes entre sí, que sirven para atacar el problema.}
 Acorde a lo explicado en la sección \ref{sec:obj}, he propuesto las tres iniciativas y las he 
-reflejado como proyectos dentro del repositorio de GitHub \cite{repo}.
+reflejado como proyectos dentro del repositorio de GitHub.
 \begin{figure}[H]
 \centering	
 \includegraphics[scale=0.4]{iniciativas.png}
@@ -34,7 +46,7 @@ como épicas el frontend y el backend. Se reflejan en GitHub como milestones.
 \end{figure}
 
 
-\subsection{Historia de usuario}
+\subsection{Historia de usuario}\label{subsec:hu}
 Una épica a su vez está formada por varias historias de usuario que definen \textbf{una funcionalidad que el usuario espera en una solución}, de la forma:\\ \textit{Como [rol] quiero [funcionalidad] para [razón].}\\
 
 A la hora de implementar una historia de usuario, esta se puede definir con requisitos más detallados.
@@ -44,7 +56,7 @@ A la hora de implementar una historia de usuario, esta se puede definir con requ
 	\includegraphics[scale=0.4]{hu.png}
 	\end{figure}
 
-\subsection{Issues}
+\subsection{Issues}\label{subsec:issue}
 \textbf{Cuando no se obtiene el comportamiento esperado}, podemos abrir un issue que se cerrará con un commit que lo solucione e idealmente un test que lo detecte.
 
 \begin{figure}[H]
@@ -60,7 +72,7 @@ A la hora de implementar una historia de usuario, esta se puede definir con requ
 	\end{figure}
 
 
-\section{Control de calidad}
+\section{Control de calidad}\label{sec:cal}
 
 Para asegurar la calidad del proyecto necesitamos utilizar \textbf{integración continua con tests y análisis estático del código} por medio de linters (ver sección \ref{sec:tools}).
 
