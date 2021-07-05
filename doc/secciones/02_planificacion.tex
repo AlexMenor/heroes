@@ -1,6 +1,6 @@
-\chapter{Planteamiento}
+\chapter{Planificación}
 
-Vamos a plantear de forma general una implementación y cómo aseguramos la calidad de la misma.
+Antes de hablar de detalles de implementación, tenemos que pensar en la metodologia y el control de calidad de la solución a construir.
 
 \section{Metodología}
 
@@ -78,16 +78,5 @@ son distintos para cada entorno.
 	\includegraphics[scale=0.4]{ci.png}
 	\end{figure}
 
-\section{Planteamiento de implementación}
-
-Tenemos dos partes bien diferenciadas.
-\begin{itemize}
-	\item  \textbf{La parte del cliente,} que se encargaría de actualizar con cierta frecuencia
-la ubicación de cada usuario, recibir un aviso cuando haya alguien cercano que necesite ayuda y permitir realizar el seguimiento de una alerta.
-\item Por otro lado, \textbf{la parte del servidor} recibe tanto las actualizaciones en cuanto a ubicación como 
-los avisos de alerta. Se encarga por tanto de hacer los cálculos para saber a quién avisar y hacerlo. \\
-Una vez la víctima y la persona que se presta a ayudar están conectadas, el servidor debe mantener
-al cliente informado sobre la localización de la víctima y el estado de la alerta.
-\end{itemize}
 
 

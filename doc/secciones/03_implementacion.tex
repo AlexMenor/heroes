@@ -1,7 +1,19 @@
-\chapter{Backend}
+\chapter{Implementación}
+
+Tenemos dos partes bien diferenciadas.
+\begin{itemize}
+	\item  \textbf{La parte del cliente,} que se encargaría de actualizar con cierta frecuencia
+la ubicación de cada usuario, recibir un aviso cuando haya alguien cercano que necesite ayuda y permitir realizar el seguimiento de una alerta.
+\item Por otro lado, \textbf{la parte del servidor} recibe tanto las actualizaciones en cuanto a ubicación como 
+los avisos de alerta. Se encarga por tanto de hacer los cálculos para saber a quién avisar y hacerlo. \\
+Una vez la víctima y la persona que se presta a ayudar están conectadas, el servidor debe mantener
+al cliente informado sobre la localización de la víctima y el estado de la alerta.
+\end{itemize}
+
+\section{Backend}
 
 En esta sección voy a hablar de \textbf{la implementación del microservicio de geolocalización}, el backend del sistema de auxilio.
-\section{Lenguaje de programación}
+\subsection{Lenguaje de programación}
 He decidido usar \textbf{Typescript} \cite{typescript}. Es un lenguaje de tipado gradual que transpila a Javascript.
 Como ventajas sobre Javascript:
 \begin{itemize}
@@ -16,14 +28,14 @@ de peticiones que se atienden en este backend (sin cómputos extensos).  \\ \\
 Como alternativa, podría haber elegido Deno \cite{deno}, pero no tiene un ecosistema aún tan desarrollado.
 Como gestor de paquetes, he utilizado NPM \cite{npm}.
 
-\section{Framework}
+\subsection{Framework}
 \textbf{La API será, por simplicidad, REST \cite{rest}.} Necesitamos un framework para implementar esta interfaz. \\
 
 \textbf{He decido usar Express \cite{express}. Es un framework \textit{unopinionated} muy consolidado.} Esto tiene importancia en la 
 arquitectura limpia, que explico en la sección \ref{sec:clean}. \\
 Otras alternativas que he considerado son: Koa, Fastify o Hapi.
 
-\section{Setup de desarrollo}\label{sec:dev}
+\subsection{Setup de desarrollo}\label{sec:dev}
 
 He invertido tiempo en tener \textbf{un entorno de desarrollo replicable por cualquiera que esté interesado en trabajar en este proyecto.}
 Por eso, he usado Docker y Docker Compose \cite{docker}. He creado un \textit{Dockerfile} que encapsula el microservicio. 
@@ -38,7 +50,7 @@ Podemos simplemente copiar este archivo a otro de nombre \textit{.env} y \textit
 \item Una vez hecho esto, simplemente ejecutamos: \textbf{\textit{docker-compose up}}.
 \end{enumerate}
 
-\section{Base de datos}
+\subsection{Base de datos}
 
 Necesito una base de datos que \textbf{soporte un gran volumen de operaciones (especialmente actualizaciones) y permita consultas basadas en localizaciones geográficas.} \\ \\
 \textbf{En el CAP Theorem \cite{cap} necesito la A (de availability) y la P (de partition tolerance), sacrificando la consistencia.}
@@ -46,7 +58,7 @@ Necesito una base de datos que \textbf{soporte un gran volumen de operaciones (e
 En esta base de datos se almacenará de manera periódica la ubicación de cada uno de los usuarios con el fin de una consulta posterior, que nos permita saber qué usuarios
 están cerca de una persona que necesita ayuda. Por ello, es más que suficiente la \textbf{consistencia eventual.}
 
-\subsection{Opciones}
+\subsubsection{Opciones}
 
 \begin{itemize}
 	\item \textbf{MongoDB tiene buen soporte para \textit{geo-queries}} \cite{mongo}, de hecho vienen ya instaladas, sin embargo, \textbf{prioriza la consistencia antes que la disponibilidad \cite{mongo-cap}.} 
@@ -63,12 +75,12 @@ Tras probar CouchDB me di cuenta de que \textbf{el soporte para queries de geolo
 
 Además, puedo habilitar la escritura en replicas para cambiar la consistencia estricta por consistencia eventual y tener más disponibilidad. 
 
-\subsection{Configuración de MongoDB}
+\subsubsection{Configuración de MongoDB}
 
 En el archivo \textit{mongo-init.js} se crea el usuario que se va a utilizar desde el microservicio y el índice "2dsphere". 
 En Docker Compose lo monto como volumen para que lo pueda ejecutar en tiempo de inicialización la instancia que se declara ahí.
 
-\section{Arquitectura limpia}\label{sec:clean}
+\subsection{Arquitectura limpia}\label{sec:clean}
 
 He tratado de mantener en todo momento \textbf{el dominio desacoplado de los detalles de infraestructura, de la interfaz de usuario y de cualquier framework.}
 \begin{figure}[H]
@@ -80,13 +92,13 @@ He tratado de mantener en todo momento \textbf{el dominio desacoplado de los det
 \textbf{Tenemos tres capas bien diferenciadas:}
 
 
-\subsection{Aplicación}
+\subsubsection{Aplicación}
 En este caso es una \textbf{API REST implementada con Express.} Toma peticiones HTTP, extrae la información, la valida, usa métodos expuestos del dominio y devuelve información.
 Aparte, también hay un endpoint \textbf{websocket} que explico en la subsección \ref{subsec:websocket}. \\
 Considero importante separar bien esta capa del servicio de dominio que consume. Con esto, sería sencillo dejar de usar 
 REST para utilizar \textit{SOAP} o \textit{GraphQL}, por ejemplo. \textbf{Incluso podríamos utilizar otro framework con esfuerzo mínimo.}
 
-\subsection{Dominio}
+\subsubsection{Dominio}
 \textbf{Tipos y casos de uso que pertenecen exclusivamente al dominio.}
 Cuando estos casos de uso necesitan utilizar un servicio de infraestructura como el de persistencia, por ejemplo,
 \textbf{se depende exclusivamente de una interfaz que describe esa función y se inyecta en tiempo de ejecución un servicio que la implemente (inyección de dependencias).}
@@ -106,7 +118,7 @@ Por último, he comentado concienzuadamente las interfaces con \textbf{JSDoc} \c
 	\includegraphics[scale=0.9]{jsdoc.png}
 	\end{figure}
 
-\subsection{Infraestructura} 
+\subsubsection{Infraestructura} 
 Son servicios que implementan las interfaces de las que acabo de hablar.
 En este capa está la lógica para comunicarse con los distintos servicios: Bases de datos, mensajería, etc...
 \begin{figure}[H]
@@ -115,22 +127,22 @@ En este capa está la lógica para comunicarse con los distintos servicios: Base
 	\end{figure}
 
 
-\section{Operaciones}
+\subsection{Operaciones}
 
 Descripción en líneas generales de los tipos de peticiones que debe atender el backend:
 
-\subsection{Crear/Actualizar ubicación}\label{op:ubi}
+\subsubsection{Crear/Actualizar ubicación}\label{op:ubi}
 Toma unas coordenadas y un id de usuario y persiste en la base de datos.
 Esta operación es indispensble para avisar a los usuarios cercanos a una emergencia y para 
 actualizarlos sobre la posición de una víctima (publicando la ubicación actualizada en el pub/sub, sección \ref{sec:pubsub}).
 
-\subsection{Crear alerta}
+\subsubsection{Crear alerta}
 Verificando antes que el usuario no tiene ya otra alerta en curso, la persiste.
 Busca todos los usuarios cercanos que hayan actualizado su ubicación recientemente y les avisa. Para hacer
 esta consulta rápidamente, la operación \ref{op:ubi} indexa las ubicaciones.
 Mientras siga en estado activo, se verifica que el usuario sigue actualizando su ubicación, de lo contrario la alerta pasa a estado inactivo.
 
-\subsection{Escuchar alerta}\label{subsec:websocket}
+\subsubsection{Escuchar alerta}\label{subsec:websocket}
 Los usuarios a los que se ha avisado de la alerta pueden empezar a escuchar actualizaciones de la alerta,
 ya sea porque el usuario que la creó cambia su posición o porque la alerta es ya inactiva. \\
 Para esto:
@@ -145,11 +157,11 @@ He considerado que podría utilizar otros protocolos como SSE (server sent event
 
 Es cierto que quitaría carga al servidor, pero también aumentaria la complejidad.
 
-\subsection{Borrar alerta}
+\subsubsection{Borrar alerta}
 Se marca una alerta existente como inactiva. Si hay usuarios pendientes de esta alerta, se les avisa.
 
 
-\section{Pub/Sub}\label{sec:pubsub}
+\subsection{Pub/Sub}\label{sec:pubsub}
 \textbf{Al usar websockets}, teniendo en cuenta que queremos tener escalado horizontal en este servicio,
 \textbf{necesitamos un sistema de publicación/subscripción.} \\
 Para ello, \textbf{he elegido Redis \cite{redis}}, que cuenta con una interfaz muy simple. Como librería, ioredis, 
@@ -163,12 +175,12 @@ Para escalar, tendríamos que añadir más instancias del microservicio y potenc
 	\end{figure}
 
 \textbf{Por cada instancia del microservicio, tenemos dos conexiones a Redis:}
-\subsection{Publisher}
+\subsubsection{Publisher}
 
 Este servicio simplemente se conecta a Redis y \textbf{publica entidades en el momento en el que se modifican} (ubicaciones y alertas).
 Publica al canal definido con el id de la entidad, esta misma serializada en JSON.
 
-\subsection{Subscriber}
+\subsubsection{Subscriber}
 Este servicio es algo más sofisticado. \textbf{Mantiene en un Map los canales a los que está subscrito y 
 para cada canal todas las subscripciones.} Estas mismas tienen un id para manejar la desubscripción (generado en tiempo de creación) y 
 el callback que hay que ejecutar cuando llega una publicación para esa subscripción. 
@@ -178,11 +190,11 @@ el callback que hay que ejecutar cuando llega una publicación para esa subscrip
 	\caption{Estructura de datos en Subscriber}
 	\end{figure}
 Cuando un websocket se cierra, las subscripciones asociadas desaparecen de esta estructura.
-\section{Envío de notificaciones}\label{sec:fibpre}
+\subsection{Envío de notificaciones}\label{sec:fibpre}
 \textbf{Para avisar a las personas cercanas de que alguien necesita ayuda, tenemos que tener la habilidad de enviar
 notificaciones push.} Para esto he usado Firebase Cloud Messaging, del que hablo más en la sección \ref{sec:fib}.
 
-\section{Tests}\label{sec:tests}
+\subsection{Tests}\label{sec:tests}
 En este microservicio uso Jest y Supertest \cite{supertest} para \textbf{testear las capas de aplicación y dominio, con mocks de la capa de infraestructura.} \\ \\
 Como próximos pasos, deberíamos implementar tests unitarios para la capa de dominio y especialmente la de infraestructura.
 \begin{figure}[H]
@@ -190,7 +202,7 @@ Como próximos pasos, deberíamos implementar tests unitarios para la capa de do
 	\includegraphics[scale=0.5]{test.png}
 	\end{figure}
 
-\section{Configuración}\label{sec:config}
+\subsection{Configuración}\label{sec:config}
 \textbf{Las variables de configuración se definen mediante variables de entorno.} Para desarrollo uso \textit{dotenv}, 
 que las carga de un archivo de configuración.
 \begin{figure}[H]
@@ -208,7 +220,7 @@ que las carga de un archivo de configuración.
 
 
 
-\section{Otras herramientas}\label{sec:tools}
+\subsection{Otras herramientas}\label{sec:tools}
 Otras herramientas que he utilizado en esta parte son:
 \begin{itemize}
 	\item \textbf{Express-validator} para validar los cuerpos de las peticiones HTTP
@@ -217,3 +229,181 @@ Otras herramientas que he utilizado en esta parte son:
 	\item \textbf{Nodemon} para reiniciar el microservicio cada vez que hay cambios durante el desarrollo.
 	\item \textbf{Concurrently} para ejecutar con un solo comando (\textit{npm run dev}) el watcher de Typescript y Nodemon.
 \end{itemize}
+
+\section{Frontend}
+La segunda parte del sistema de auxilio es el cliente, \textbf{el código que se ejecuta en el dispositvo del usuario.}
+\subsection{Elección de la tecnología}
+Nunca hemos tenido tantas opciones:
+\subsubsection{Web vs aplicación móvil}
+Para el proyecto considero imprescindible que el cliente sea de la forma de \textbf{una aplicación móvil.} 
+Una web app para este caso de uso la descarto por los siguientes motivos:
+\begin{enumerate}
+  \item Una app instalada es \textbf{más accesible} que entrar al navegador y después a una web.
+  \item La cantidad de APIs a las que podemos acceder desde una aplicación es mayor. \textbf{Y necesito acceso a APIs muy concretas que no se pueden usar a traves del navegador.}
+	\item \textbf{Ejecutar procedimientos en segundo plano en una web app cuando está cerrada no es posible.}
+	\item \textbf{Recibir notificaciones push en iOS no es posible por medio de una web app.}
+\end{enumerate}
+
+\subsubsection{Framework de aplicación móvil}
+
+\textbf{¿Qué características son deseables?}
+
+\begin{enumerate}
+  \item \textbf{Una base de código} para iOS y Android.
+  \item \textbf{Paradigma declarativo}, que es más mantenible y claro que el imperativo.
+  \item \textbf{Capacidad para utilizar funcionalidades nativas}, especificas del sistema operativo subyacente.
+\end{enumerate}
+
+\textbf{Por la primera característica, tengo que descartar Android e IOS nativo.} \\
+
+\textbf{Plataformas que la cumplen: }
+\begin{itemize}
+  \item React Native \cite{reactnative}
+  \item Nativescript \cite{nativescript}
+  \item Ionic \cite{ionic}
+  \item Quasar \cite{Quasar}
+  \item Flutter \cite{flutter}
+\end{itemize}
+
+\textbf{Flutter vs React native}: Si bien es cierto que React Native tiene a favor la popularidad, un lenguaje al que ya estoy habituado y más estabilidad, es más lento que Flutter y hace una traducción de componentes a código nativo.
+\textbf{Con Flutter sin embargo hay total control de los componentes y se muestran igual en las dos plataformas.} \\ \\
+
+\textbf{Qasar e Ionic vs React native}: Qasar e Ionic son muy parecidos a React Native con menos popularidad, más posibilidad de frameworks como Vue o Angular pero usando 
+una webview con acceso a APIs nativas via cordova. \\ \\
+
+\textbf{Nativescript vs React Native:} Nativescript por último es similar a React Native, también en el método, ya que accede directamente a APIs nativas. \\ \\
+
+\subsubsection{Lenguaje en la aplicación móvil}
+\textbf{Flutter usa Dart} \cite{dart}, que es un lenguaje tipado que recuerda a Typescript: también con una hebra única y E/S no bloqueante.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.6]{dart.png}
+	\caption{Funcionamiento del runtime de Dart}
+	\end{figure}
+
+\subsection{Diseño}
+La parte de la solución que estamos implementando en este proyecto tiene unos inputs muy simples:
+\begin{itemize}
+	\item Activar alerta
+	\item Desactivar alerta
+	\item Escuchar alerta
+	\item Cancelar escucha de alerta
+\end{itemize}
+
+\textbf{El FAB (floating action button)} que se situa abajo a la derecha realiza la primera, segunda y cuarta función. 
+Cambia el icono central y su color dependiendo de la acción que dispara. En el caso de desactivar la alerta,
+también se hace más grande para incluir un texto específico que podemos ver en la figura \ref{fig:alert}.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.6]{mockup.png}
+	\caption{Esquema de la aplicación}
+	\end{figure}
+
+Para escuchar una alerta, ha sido necesario incluir el \textbf{snackbar}, que emerge de la parte inferior de la aplicación cuando es necesario.
+Esto es así, porque el usuario podría necesitar usar el FAB (en caso de necesitar ayuda) incluso si ha recibido una alerta. \\ \\
+
+Por último, \textbf{para mostrar información tenemos el info banner y el mapa.} El primero informa al usuario una vez ha activado
+una alerta de que esto se ha hecho con éxito, también informa de que se puede ver en el mapa la ubicación de la víctima en tiempo real
+si está escuchando una alerta.
+
+\subsection{Mapa}
+En la aplicación, el mapa es muy protagonista. En él se ve representado el usuario y en caso de
+atención a una alerta, también la víctima. \\ \\
+Para implementarlo, \textbf{hay dos componentes:}
+ \begin{itemize}
+   \item \textbf{Provider de mapas:} Proporcionan los \textit{tiles} que no son más que imágenes que forman el mapa. \textbf{OpenStreetMap, por ejemplo}. Se puede configurar por variables de entorno en la aplicación.
+   \item \textbf{Controlador:} Su función es \textbf{cargar y mostrar los \textit{tiles} en la pantalla}, además de \textbf{reaccionar a los gestos que hace el usuario} para moverse por el mapa. 
+ \end{itemize}
+
+ Estoy utilizando OpenStreetMap como provider \cite{openstreetmap} por ser uno de los pocos que se pueden utilizar gratuitamente. \\ \\
+ Como controlador, Map Controller Library \cite{map}, porque es bastante maduro, customizable y compatible con cualquier provider.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{home.png}
+	\caption{Pantalla principal de la aplicación}
+	\end{figure}
+
+\subsection{Actualización de la localización}
+Una parte fundamental de la aplicación es tener al día la ubicación del usuario para que \textbf{sea localizable en situación de alerta.} \\
+
+En cualquiera de los siguientes escenarios:
+\begin{itemize}
+	\item La aplicación está en \textbf{primer plano.}
+	\item La aplicación está \textbf{abierta en segundo plano.}
+	\item La aplicación está \textbf{cerrada.}
+\end{itemize}
+
+Para ello, \textbf{he usado un isolate} (una hebra de Dart que se ejecuta aislada de la hebra principal, con un event loop independiente), que se comunica con la aplicación por medio de un Port (un canal entre hebras) y envía la ubicación actual al servidor. \\ \\
+Además, usa APIs de Android que sacan partido a varios sensores del dispositivo para \textbf{disparar este 
+proceso solo cuando el usuario realmente está en movimiento.}
+También ha sido necesario registrar plugins como Firebase Cloud Messaging en java, para que estén disponibles en el isolate.
+
+\subsection{Firebase Cloud Messaging}\label{sec:fib}
+Como he anticipado en la sección \ref{sec:fibpre}, necesitamos un mecanismo para enviar notificaciones push a los usuarios en iOS y Android.
+Además de integrar FCM en el servidor, también tenemos que hacerlo en el cliente para que las notificaciones lleguen en todos los escenarios.
+
+\begin{itemize}
+	\item La aplicación está en \textbf{primer plano.}
+	\item La aplicación está \textbf{abierta en segundo plano.}
+	\item La aplicación está \textbf{cerrada.}
+\end{itemize}
+
+
+Otra ventaja de usar FCM, es que nos permite obtener de manera sencilla un identificador único de dispositivo, que podemos usar en el servidor para enviar las notificaciones push.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.8]{notification.png}
+	\caption{Notificación de alerta cuando la aplicación está cerrada}
+	\end{figure}
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{notification-inapp.png}
+	\caption{Notificación de alerta cuando la aplicación está abierta}
+	\end{figure}
+
+\subsection{Websockets}
+
+Para obtener actualizaciones respecto a una alerta una vez la estamos escuchando, utilizamos el endpoint del que hemos hablado en \ref{subsec:websocket} mediante websockets.
+He usado una librería \cite{websocketchannel} para esto.
+
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.2]{watch-alert.png}
+	\caption{Pantalla de seguimiento de alerta, actualización de la ubicación de la víctima y del estado de la alerta en tiempo real}
+	\end{figure}
+
+\subsection{Manejo del estado}
+\textbf{En flutter}, como en otros frameworks (React, Vue, Angular, etc...), \textbf{se crea un árbol de componentes.}
+Los datos fluyen de arriba a abajo, de padres que saben más a hijos que saben
+menos. Y los eventos de abajo a arriba, \textbf{los hijos informan a los padres de cambios mediante callbacks.}
+\begin{figure}[H]
+	\centering	
+	\includegraphics[scale=0.3]{tree.png}
+	\caption{Un árbol de componentes}
+	\end{figure}
+Sin embargo, hay veces que \textbf{ciertos datos o comportamientos deben ser
+expuestos para muchos componentes.} También puede pasar que no se necesiten
+en componentes superficiales y sean necesarios en otros muy profundos. \\ \\
+En un ecosistema tan grande como el de Flutter, tenemos varias propuestas, más y
+menos sofisticadas. Redux, BLoC/Rx o MobX son algunos ejemplos, adecuadas
+para casos más pesados.\\ \\
+En mi opinión, \textbf{para aplicaciones pequeñas/medianas Provider es un \textit{sweet spot}
+entre no usar estado de aplicación y usar uno muy potente.} \\ \\
+
+Para esta aplicación, tiene mucho sentido porque los datos no tienen estructura jerárquica, como, digamos, un e-commerce. \\
+He utilizado dos providers que \textbf{exponen comportamiento y datos muy cohesionados:}
+\begin{itemize}
+	\item \textbf{Geolocalization provider:} Que ofrece getters y setters sobre el servicio de actualización en segundo plano y la localización actual.
+	\item \textbf{Alert provider:} Que crea y realiza el seguimiento de alertas. También mantiene el estado sobre el rol del usuario (emitiendo alerta, standby, escuchando alerta, etc...).
+\end{itemize}
+
+\begin{figure}[H]\label{fig:alert}
+	\centering	
+	\includegraphics[scale=0.2]{create-alert.png}
+	\caption{La aplicación después de crear una alerta. Los componentes reaccionan a cambios en los providers.}
+	\end{figure}
