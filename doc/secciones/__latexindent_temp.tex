@@ -1,5 +1,5 @@
 \chapter{Implementación}
-En primer lugar tenemos que decidir entre un sistema P2P o uno con arquitectura de cliente-servidor.
+En primer lugar tenemos que decidir entre un sistema \textit{peer to peer} \cite{p2p} o uno con arquitectura de cliente-servidor \cite{client-server}.
 Creo que la decisión más apropiada es la segunda, pues nos permite más control y simplifica mucho el diseño. \\\\
 Tenemos dos partes bien diferenciadas.
 \begin{itemize}
@@ -12,13 +12,13 @@ al cliente informado sobre la localización de la víctima y el estado de la ale
 \end{itemize}
 
 \section{Backend}
-La mayoría de la lógica de la aplicación está en este componente, por lo que descartamos un BaaS, que sería más apropiado en el caso de un cliente 
+La mayoría de la lógica de la aplicación está en este componente, por lo que descartamos un BaaS \cite{baas}, que sería más apropiado en el caso de un cliente 
 muy rico y un backend que se encargue solamente de la autenticación y la persistencia. \\ \\
 
 En esta sección voy a hablar de \textbf{la implementación de este microservicio de geolocalización}.
 \subsection{Lenguaje de programación}
 Necesito un lenguaje que me permita modelar bien el dominio, tenga un buen ecosistema y proporcione una buena experiencia de desarrollo, evitando lenguajes demasiado estrictos y ''verbosos''.
-He decidido usar \textbf{Typescript} \cite{typescript}, que es un lenguaje de tipado gradual que transpila a Javascript.
+He decidido usar \textbf{Typescript} \cite{typescript}, que es un lenguaje de tipado gradual que transpila \cite{transpiler} a Javascript \cite{javascript}.
 Como ventajas sobre Javascript:
 \begin{itemize}
 	\item Mejor \textit{developer experience}, sobre todo gracias al autocompletado.
