@@ -320,7 +320,7 @@ En la aplicación, el mapa es muy protagonista. En él se ve representado el usu
 atención a una alerta, también la víctima. \\ \\
 Para implementarlo, \textbf{hay dos componentes:}
  \begin{itemize}
-   \item \textbf{Provider de mapas:} Proporcionan los \textit{tiles} que no son más que imágenes que forman el mapa. \textbf{OpenStreetMap, por ejemplo}. Se puede configurar por variables de entorno en la aplicación.
+   \item \textbf{Provider de mapas:} Proporcionan los \textit{tiles}, que no son más que imágenes que forman el mapa. \textbf{OpenStreetMap, por ejemplo}. Se puede configurar por variables de entorno en la aplicación.
    \item \textbf{Controlador:} Su función es \textbf{cargar y mostrar los \textit{tiles} en la pantalla}, además de \textbf{reaccionar a los gestos que hace el usuario} para moverse por el mapa. 
  \end{itemize}
 
@@ -385,13 +385,13 @@ He usado una librería \cite{websocketchannel} para esto.
 	\end{figure}
 
 \subsection{Manejo del estado}
-\textbf{En flutter}, como en otros frameworks (React, Vue, Angular, etc...), \textbf{se crea un árbol de componentes.}
+\textbf{En Flutter}, como en otros frameworks (React, Vue, Angular, etc...), \textbf{se crea un árbol de componentes.}
 Los datos fluyen de arriba a abajo, de padres que saben más a hijos que saben
 menos. Y los eventos de abajo a arriba, \textbf{los hijos informan a los padres de cambios mediante callbacks.}
 \begin{figure}[H]
 	\centering	
 	\includegraphics[scale=0.3]{tree.png}
-	\caption{Un árbol de componentes}
+	\caption{Un árbol de componentes. Fuente: Flutter docs \cite{state}}
 	\end{figure}
 Sin embargo, hay veces que \textbf{ciertos datos o comportamientos deben ser
 expuestos para muchos componentes.} También puede pasar que no se necesiten
@@ -402,7 +402,7 @@ para casos más pesados.\\ \\
 En mi opinión, \textbf{para aplicaciones pequeñas/medianas Provider es un \textit{sweet spot}
 entre no usar estado de aplicación y usar uno muy potente.} \\ \\
 
-Para esta aplicación, tiene mucho sentido porque los datos no tienen estructura jerárquica, como, digamos, un e-commerce. \\
+Para esta aplicación, tiene mucho sentido, porque los datos no tienen estructura jerárquica, como, digamos, un e-commerce. \\
 He utilizado dos providers que \textbf{exponen comportamiento y datos muy cohesionados:}
 \begin{itemize}
 	\item \textbf{Geolocalization provider:} Que ofrece getters y setters sobre el servicio de actualización en segundo plano y la localización actual.
