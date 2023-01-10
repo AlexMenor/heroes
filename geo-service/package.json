@@ -39,7 +39,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-validator": "^6.10.0",
-    "firebase-admin": "^9.6.0",
+    "firebase-admin": "^11.4.1",
     "ioredis": "^4.27.6",
     "mongodb": "^3.6.5",
     "uuid": "^8.3.2",
